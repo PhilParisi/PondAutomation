@@ -4,15 +4,15 @@ A collaboration for the development of an automated algae pond. This github repo
 Each github 'branch' represents a different phase of the project. You can select which 'Phase' of the project you would like to view the code for in the dropdown above. 
 
 ### File Structure
-PondAutomation/
-|`configs` contains configurations needed to run the system  
-| `data` upon running the script, outputs are stored here  
-| |---- `DATETIME`  
+`PondAutomation/`
+|`configs/` contains configurations needed to run the system  
+| `data/` upon running the script, outputs are stored here  
+| |---- `DATETIME/`  
 | | |---- `pond_settings_used.csv` contains the configurations used  
 | | |---- `DATETIME_sensor_data` contains sensor measurements (future work)  
-| `functions` contains the scripts that run on the raspberry pi for operation  
-| `graphics` contains diagrams and photos, some of which are used in this guide  
-`automate_pond.py` is the single script that needs to be run by the user  
+| `functions/` contains the scripts that run on the raspberry pi for operation  
+| `graphics/` contains diagrams and photos, some of which are used in this guide  
+`automate_pond.py` is the single script that needs to be run by the user, it controls the entire process  
 
 ### System Requirements
 The following describes the platform the code runs on, other configurations have not been tested
