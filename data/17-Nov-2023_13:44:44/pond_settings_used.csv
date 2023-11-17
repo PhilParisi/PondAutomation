@@ -1,0 +1,4 @@
+minutes_till_first_flood,0.1
+flood_duration,0.1
+drought_duration,0.2
+total_program_runtime,inf
