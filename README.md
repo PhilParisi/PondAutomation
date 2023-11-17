@@ -5,14 +5,14 @@ Each github 'branch' represents a different phase of the project. You can select
 
 ### File Structure
 PondAutomation/
-|`configs` contains configurations needed to run the system
-| `data` upon running the script, outputs are stored here
-| |---- `DATETIME`
-| | |---- `pond_settings_used.csv` contains the configurations used
-| | |---- `DATETIME_sensor_data` contains sensor measurements (future work)
-| `functions` contains the scripts that run on the raspberry pi for operation
-| `graphics` contains diagrams and photos, some of which are used in this guide
-`automate_pond.py` is the single script that needs to be run by the user
+|`configs` contains configurations needed to run the system  
+| `data` upon running the script, outputs are stored here  
+| |---- `DATETIME`  
+| | |---- `pond_settings_used.csv` contains the configurations used  
+| | |---- `DATETIME_sensor_data` contains sensor measurements (future work)  
+| `functions` contains the scripts that run on the raspberry pi for operation  
+| `graphics` contains diagrams and photos, some of which are used in this guide  
+`automate_pond.py` is the single script that needs to be run by the user  
 
 ### System Requirements
 The following describes the platform the code runs on, other configurations have not been tested
