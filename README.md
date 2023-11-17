@@ -27,7 +27,8 @@ Python Libraries
 ### Accessing the Code
 If you are new to git and plan to use its features, you should see this [beginner guide](https://medium.com/@PhilParisi/getting-started-with-github-for-people-who-hate-github-1f25b071930d) (amongst others). 
 
-If you plan to edit code and contribute to this project, you should clone the repository `git clone https://github.com/PhilParisi/PondAutomation`.
+If you plan to edit code and contribute to this project, you should clone the repository with  
+`git clone https://github.com/PhilParisi/PondAutomation`.
 
 If you simply want a local copy of the code to play around with, you can either clone (like above) or click the green `Code` button and `Download ZIP` to your local system.
 
