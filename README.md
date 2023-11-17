@@ -69,6 +69,11 @@ The solenoid is **normally closed**, which means:
   - In a 'no flow' emergency, you can try: resetting the RPi, consulting the programmer, providing water manually  
 
 ### Inputs
+When running the script, the user is prompted for key settings that determine behavior of the system
+1. How many MINUTES until the first flood? --> the system starts with no flow, then will start flowing after this duration
+2. What is the FLOOD duration in MINUTES? --> how long the solenoid will stay open (free flow) for during floods
+3. What is the DROUGHT duration in MINUTES? --> how long the solenoid will stay closed (no flow) for during droughts
+4. How many MINUTES do you want to run the program for? --> if a number is inputted, program ends when this duration is reached // if 0 is inputted, there will be no programmed end to the program
 
 ### Outputs
 - the solenoid is programmed to open and close at intervals set in the 'Inputs' section
