@@ -12,7 +12,7 @@ Each github 'branch' represents a different phase of the project. You can select
 | | |---- `DATETIME_sensor_data` contains sensor measurements (future work)  
 | `functions/` contains the scripts that run on the raspberry pi for operation  
 | `graphics/` contains diagrams and photos, some of which are used in this guide  
-`automate_pond.py` is the single script that needs to be run by the user, it controls the entire process  
+| `automate_pond.py` is the single script that needs to be run by the user, it controls the entire process  
 
 ### System Requirements
 The following describes the platform the code runs on, other configurations have not been tested
@@ -42,6 +42,13 @@ In this case, we aren't fully draining the tank. We are simply allowing new wate
 The below schematic shows the wiring of electrical components and application.
 ![Pond Schematic](graphics/pond_schematic.png)
 
+#### Key Hardware
+1. RaspberryPi 4B (2GB RAM) for control
+2. Relay to power solenoid
+3. Solenoid (6-12V) to open/shutoff flow
+4. Breadboard w/ Diode and LED state indicator lights (see 'State Transition Diagram' below)
+
+
 ## Running the Program
 1. Ensure this repository is present on your system (either clone or copied)
 2. Ensure physical setup matches schematic (TODO: you can adjust your RPi GPIO inputs in the `configs/rpi_connections.py` file)
@@ -49,7 +56,7 @@ The below schematic shows the wiring of electrical components and application.
 4. Open a command line or terminal
 5. Navigate into the project folder that contains this code, likely `cd PondAutomation`
 6. Launch the automation file with `python3 automate_pond.py`
-7. Answers any questions the scripts as for
+7. Answers any questions the script asks you
 8. Program should run!
 9. Use CTRL+C to kill the program
 
@@ -66,21 +73,8 @@ The solenoid is **normally closed**, which means:
 - the solenoid is programmed to open and close at intervals set in the 'Inputs' section
 - data is written to .csv files in the 
 
-## Key Hardware
-1. RaspberryPi 4B (2GB RAM)
-2. Relay
-3. Solenoid (6-12V)
-4. Breadboard w/ Diode
-
 
 ## State Transition Diagram
-Below is the state transition diagram which describes the behavior of the system, and how the program transitions to different states. This is also called the 'control flow'. 
+Below is the state transition diagram which describes the behavior of the system, and how the program transitions to different states. This is also called the 'control flow'.  
 ![state transition diagram](graphics/pond_statetransition.png)
 
-
-
-# Phase II -
-
-
-
-# Phase III - 
