@@ -84,3 +84,12 @@ When running the script, the user is prompted for key settings that determine be
 Below is the state transition diagram which describes the behavior of the system, and how the program transitions to different states. This is also called the 'control flow'.  
 ![state transition diagram](graphics/pond_statetransition.png)
 
+
+## Setting up your RaspberryPi
+1. plug in peripherals (monitor, keyboard, mouse)
+2. power on the RPi (important that the monitor is plugged in before powering on)
+3. follow instructions to setup the device like you would a normal computer (treat RPi like a normal computer fyi)
+4. connect to the internet (either by ethernet cable, or via WiFi)
+5. clone this repository by opening a termianl (CTRL + ALT + T) and typing `git clone https://github.com/PhilParisi/PondAutomation`
+6. different versions of the code are available on different _branches_, type `git fetch --all` to get all branches locally
+7. switch to the branch you want with `git checkout 
