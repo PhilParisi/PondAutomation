@@ -218,7 +218,7 @@ class Pond:
             print(f"- timer '{timer_name}' already exists, skipping timer creation in add_timer()")
         else:
             time_to_store = datetime.now()
-            self.timers[timer_name] = {'duration': round(duration*60), 'current_time': time_to_store} # store the inputted duration and the current_time
+            self.timers[timer_name] = {'duration': (duration*60), 'current_time': time_to_store} # store the inputted duration and the current_time
             #print(f"- timer '{timer_name}' added")
 
     # reset_timer() allows the user to reset the timer to the current time. This should be done when switching into a new state that needs to be timed
