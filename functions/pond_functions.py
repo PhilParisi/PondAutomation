@@ -1,6 +1,7 @@
 import sys
 import os
 import csv
+import RPi.GPIO as GPIO
 from datetime import datetime
 
 
@@ -247,3 +248,29 @@ class Pond:
             print(f"- timer '{timer_name}' does not exist, skipping get_timer_current_time() function")
 
 
+# kill at the connections the raspberrypi pas
+def shutdown_pond(rpi_connections):
+    
+    # setup the pins again, in order to prevent error messages
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setwarnings(False)
+    GPIO.setup(rpi_connections["red_LED"],GPIO.OUT)
+    GPIO.setup(rpi_connections["yellow_LED"],GPIO.OUT)
+    GPIO.setup(rpi_connections["green_LED"],GPIO.OUT)
+
+    # turn LEDs off
+    shutdown_lights(rpi_connections)
+
+    # turn solenoid off
+    shutdown_solenoid(rpi_connections)
+    
+    
+def shutdown_lights(rpi_connections):
+    GPIO.output(rpi_connections["red_LED"],GPIO.LOW)
+    GPIO.output(rpi_connections["yellow_LED"],GPIO.LOW)
+    GPIO.output(rpi_connections["green_LED"],GPIO.LOW)
+
+
+def shutdown_solenoid(rpi_connections):
+    # TODO
+    print('need to write solenoid function')

@@ -2,3 +2,5 @@
 
 # ignore the files in data
 data/
+__pycache__/
+
