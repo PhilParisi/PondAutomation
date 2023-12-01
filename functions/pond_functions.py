@@ -1,6 +1,7 @@
 import sys
 import os
 import csv
+import smbus
 import RPi.GPIO as GPIO
 from datetime import datetime
 
@@ -272,5 +273,11 @@ def shutdown_lights(rpi_connections):
 
 
 def shutdown_solenoid(rpi_connections):
-    # TODO
-    print('need to write solenoid function')
+    
+    # Setup I2C w/ Relay
+    bus = smbus.SMBus(rpi_connections['device_bus'])
+    
+    # shut solenoid
+    bus.write_byte_data(rpi_connections['relay_addr'], rpi_connections['device_bus'], 0x00)
+
+    print("- solenoid closed")

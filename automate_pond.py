@@ -7,6 +7,7 @@ import sys
 import os
 import csv
 import time
+import smbus
 import RPi.GPIO as GPIO
 from datetime import datetime
 from configs.pond_settings import pond_settings_from_file # define the flood/drought params [unused currently]
@@ -17,14 +18,21 @@ from functions.pond_functions import *
 # define the main function (call it at end of this file)
 def main():
 
+
     # System Setup before Control Loop
-
     print("*** STARTING POND AUTOMATION ***")
-    print("- user inputs loaded from configs/pond_settings.py")
-
+    
+    # Setup I2C w/ Relay
+    bus = smbus.SMBus(rpi_connections['device_bus'])
+    
+    # turn OFF solenoid (0x00 is 0 min) [close it --> no flow]
+    bus.write_byte_data(rpi_connections['relay_addr'], rpi_connections['device_bus'], 0x00)
+    print("- solenoid closed")
+    
     # obtain user inputs, create an instance of the pond class
     pond_settings = get_user_pond_settings()
     pond = Pond(pond_settings)
+    print("- user inputs loaded from configs/pond_settings.py")
 
     # check if the pond settings are correct, kill script if modifications are needed
     print("- see below settings (note: times are in minutes)")
@@ -64,7 +72,6 @@ def main():
     GPIO.setup(rpi_connections["green_LED"],GPIO.OUT)
 
 
-
     # Main Control Loop
     print("- running script, use CTRL+C to stop execution anytime")
     loop_num = 1
@@ -95,7 +102,10 @@ def main():
                 GPIO.output(rpi_connections["green_LED"],GPIO.HIGH)
                 
                 # TODO other initial checks??? Need a way to transition out of state
-                # TODO SHUT the solenoid and stop flow
+                
+                # SHUT the solenoid and stop flow
+                bus.write_byte_data(rpi_connections['relay_addr'], rpi_connections['device_bus'], 0x00)
+                print("- solenoid closed")
 
                 pond.reset_timer('initialization') # update timer to current RPi time
                 pond.set_state0_entry(True)
@@ -130,8 +140,12 @@ def main():
 
             # do this once
             if pond.get_state5_entry() == False: # if not in state, get into it
+                    
+                print('- entered state 5: first drought')
                 
-                # TODO: SHUT the solenoid and stop flow
+                # shut solenoid
+                bus.write_byte_data(rpi_connections['relay_addr'], rpi_connections['device_bus'], 0x00)
+                print("- solenoid closed")
                 
                 pond.reset_timer('first_drought')
                 pond.set_state5_entry(True)
@@ -163,13 +177,17 @@ def main():
             # do this once
             if pond.get_state10_entry() == False: # if not in state, get into it
 
-                # TODO SHUT the solenoid and stop flow
+                print('- entered state 10: drought')
+
+                # shut solenoid
+                bus.write_byte_data(rpi_connections['relay_addr'], rpi_connections['device_bus'], 0x00)
+                print("- solenoid closed")
+                
                 pond.reset_timer('drought') # update drought timer to current RPi time
                 pond.set_state10_entry(True)
                 
                 GPIO.output(rpi_connections["green_LED"],GPIO.HIGH) # turn green light on
-                
-                print('- entered state 10: drought')
+
 
             # leave state
 
@@ -194,22 +212,26 @@ def main():
             # do this once
             if pond.get_state20_entry() == False: # get into state
 
+                print('- entered state 20: flood')
                 
-                # TODO OPEN the solenoid to begin flow
+                # OPEN the solenoid to begin flow
+                bus.write_byte_data(rpi_connections['relay_addr'], rpi_connections['device_bus'], 0xFF)
+                print("- solenoid open")
 
                 pond.reset_timer('flood') # update flood timer to current RPi time
                 pond.set_state20_entry(True)
                 
                 GPIO.output(rpi_connections["yellow_LED"],GPIO.HIGH) # turn on yellow light
                 
-                print('- entered state 20: flood')
 
             # leave state
 
             # timer based
             if (datetime.now() - pond.get_timer_current_time('flood')).total_seconds() > pond.get_timer_duration('flood'):
                 
-                # TODO CLOSE the solenoid
+                # shut solenoid
+                bus.write_byte_data(rpi_connections['relay_addr'], rpi_connections['device_bus'], 0x00)
+                print("- solenoid closed")
                 
                 GPIO.output(rpi_connections["yellow_LED"],GPIO.LOW) # turn off yellow light
                 pond.set_state20_entry(False)
