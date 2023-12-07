@@ -107,21 +107,40 @@ We can connect to the pi over WiFi or via an SSH cable. WiFi is recommended and 
 #### WiFi
 1. connect the pi to a wifi network (you should have already done this in 'Setting up your RPi'), connect your personal computer to the same network
 2. MAC and Linux --> open a terminal and `ssh username@hostname` or `ssh username@ip_address` and you should be in!
-3. Windows --> I recommend downloading 'Bitvise SSH' program (google it), launch it, then type in the details into the GUI, and you should be in!
+3. Windows --> I recommend downloading [Bitvise SSH](https://www.bitvise.com/ssh-client-download) program, launch it, then type in the details into the GUI (in the top right), and you should be in!
 
 #### Ethernet
 1. connect an ethernet cable between your pi and your personal computer (this forms a direct connection)
 2. make sure your computer and RPi are disconnected from other networks
 
-## Running Scripts
+## Working on the RPi (Running Scripts, Checking on the Pond)
+
+#### SSH Into the RPi
 Assuming you have the code on the pi and everything is physically setup according to the schematic...
 1. Connect to the RPi (SSH in from either terminal (Mac/Linux) or Bitvise (Windows))
-4. Once you ssh in, you already in a terminal for the RPi.
-5. Navigate into the project folder that contains this code, likely `cd PondAutomation`
-6. Launch the automation file with `python3 automate_pond.py`
-7. Answers any questions the script asks you
-8. Program should run!
-9. Use CTRL+C to kill the program
+2. Once you ssh in, you will be in a terminal for the RPi (see 'Terminal Commands' section in this guide if you are new to using a terminal)
+3. Navigate into the project folder that contains this code, likely `cd PondAutomation` (you can also run `ls` to see the files/folders in your current directory)
+
+#### Start the Pond 
+- *VERY IMPORTANT*, start a tmux session with `tmux`
+- Launch the automation file with `python3 automate_pond.py`
+- Answers any questions the script asks you
+- Program should run!
+- CTRL+b (together), then d (after), and this will detach you from the tmux session allowing the script to continue running
+- If in the lab, check the lights and confirm everything is functioning as expected
+- Close the terminal and move on with your life
+
+#### Shutdown the Pond
+- From the terminal, find the name of the tmux session that's running with `tmux list-sessions`. This is your 'session_name' (it's likely 0, 1, or 2)
+- `tmux attach-session -t session_number` to get into that session. This should take you to viewing the outputs from the automate_pond.py script, you should see timestamps, heartbeats, and other status messages.
+- To kill the script (and shutdown the pond), CTRL+C
+- Then you can close the terminal if you have nothing else to do!
+
+#### Checking in on Operational Pond
+- From the terminal, find the name of the tmux session that's running with `tmux list-sessions`. This is your 'session_name' (it's likely 0, 1, or 2)
+- `tmux attach-session -t session_number` to get into that session. This should take you to viewing the outputs from the automate_pond.py script, you should see timestamps, heartbeats, and other status messages.
+- Observe the messages and understand what's going on.
+- To leave the pond running and exit the tmux session, CTRL+b (together), then d (after), and you will detach from the tmux session. Pond will continue running.
 
 ## Useful Commands for the RPi
 
