@@ -256,7 +256,7 @@ def shutdown_pond(rpi_connections):
     GPIO.setmode(GPIO.BCM)
     GPIO.setwarnings(False)
     GPIO.setup(rpi_connections["red_LED"],GPIO.OUT)
-    GPIO.setup(rpi_connections["yellow_LED"],GPIO.OUT)
+    GPIO.setup(rpi_connections["blue_LED"],GPIO.OUT)
     GPIO.setup(rpi_connections["green_LED"],GPIO.OUT)
 
     # turn LEDs off
@@ -268,7 +268,7 @@ def shutdown_pond(rpi_connections):
     
 def shutdown_lights(rpi_connections):
     GPIO.output(rpi_connections["red_LED"],GPIO.LOW)
-    GPIO.output(rpi_connections["yellow_LED"],GPIO.LOW)
+    GPIO.output(rpi_connections["blue_LED"],GPIO.LOW)
     GPIO.output(rpi_connections["green_LED"],GPIO.LOW)
 
 

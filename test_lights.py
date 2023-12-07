@@ -11,7 +11,7 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 
 GPIO.setup(rpi_connections["red_LED"],GPIO.OUT)
-GPIO.setup(rpi_connections["yellow_LED"],GPIO.OUT)
+GPIO.setup(rpi_connections["blue_LED"],GPIO.OUT)
 GPIO.setup(rpi_connections["green_LED"],GPIO.OUT)
 
 
@@ -25,10 +25,10 @@ try:
         print('red on')
         time.sleep(1)
         GPIO.output(rpi_connections["red_LED"],GPIO.LOW)
-        GPIO.output(rpi_connections["yellow_LED"],GPIO.HIGH)
-        print('yellow on')
+        GPIO.output(rpi_connections["blue_LED"],GPIO.HIGH)
+        print('blue on')
         time.sleep(1)
-        GPIO.output(rpi_connections["yellow_LED"],GPIO.LOW)
+        GPIO.output(rpi_connections["blue_LED"],GPIO.LOW)
         GPIO.output(rpi_connections["green_LED"],GPIO.HIGH)
         print('green on')
         time.sleep(1)
