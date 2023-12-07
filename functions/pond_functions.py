@@ -256,7 +256,7 @@ def shutdown_pond(rpi_connections):
     GPIO.setmode(GPIO.BCM)
     GPIO.setwarnings(False)
     GPIO.setup(rpi_connections["red_LED"],GPIO.OUT)
-    GPIO.setup(rpi_connections["yellow_LED"],GPIO.OUT)
+    GPIO.setup(rpi_connections["blue_LED"],GPIO.OUT)
     GPIO.setup(rpi_connections["green_LED"],GPIO.OUT)
 
     # turn LEDs off
@@ -268,7 +268,7 @@ def shutdown_pond(rpi_connections):
     
 def shutdown_lights(rpi_connections):
     GPIO.output(rpi_connections["red_LED"],GPIO.LOW)
-    GPIO.output(rpi_connections["yellow_LED"],GPIO.LOW)
+    GPIO.output(rpi_connections["blue_LED"],GPIO.LOW)
     GPIO.output(rpi_connections["green_LED"],GPIO.LOW)
 
 
@@ -281,3 +281,19 @@ def shutdown_solenoid(rpi_connections):
     bus.write_byte_data(rpi_connections['relay_addr'], rpi_connections['device_bus'], 0x00)
 
     print("- solenoid closed")
+
+    
+# this function is similar to the print() function, except it prints messages with a timestamp in front 
+def print_w_time(message):
+    
+    # Get the current date and time
+    current_time = datetime.now()
+
+    # Format the time to include only two decimal places
+    formatted_time = current_time.strftime("- %Y-%m-%d %H:%M:%S.%f")[:-5]
+
+    # Combine the formatted time and the message
+    result = f"{formatted_time} // {message}"
+
+    # Print the result
+    print(result)
