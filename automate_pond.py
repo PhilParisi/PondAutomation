@@ -72,7 +72,7 @@ def main():
     GPIO.setwarnings(False)
 
     GPIO.setup(rpi_connections["red_LED"],GPIO.OUT)
-    GPIO.setup(rpi_connections["yellow_LED"],GPIO.OUT)
+    GPIO.setup(rpi_connections["blue_LED"],GPIO.OUT)
     GPIO.setup(rpi_connections["green_LED"],GPIO.OUT)
 
 
@@ -101,9 +101,11 @@ def main():
             # do this once
             if pond.get_state0_entry() == False: # if not in state, get into it
 
+                print_w_time('- entered state 0: initialization')
+                
                 # turn on all lights
                 GPIO.output(rpi_connections["red_LED"],GPIO.HIGH)
-                GPIO.output(rpi_connections["yellow_LED"],GPIO.HIGH)
+                GPIO.output(rpi_connections["blue_LED"],GPIO.HIGH)
                 GPIO.output(rpi_connections["green_LED"],GPIO.HIGH)
                 
                 # TODO other initial checks??? Need a way to transition out of state
@@ -114,7 +116,6 @@ def main():
 
                 pond.reset_timer('initialization') # update timer to current RPi time
                 pond.set_state0_entry(True)
-                print_w_time('- entered state 0: initialization')
 
             # leave state
 
@@ -123,7 +124,7 @@ def main():
                 
                 # turn lights off
                 GPIO.output(rpi_connections["red_LED"],GPIO.LOW)
-                GPIO.output(rpi_connections["yellow_LED"],GPIO.LOW)
+                GPIO.output(rpi_connections["blue_LED"],GPIO.LOW)
                 GPIO.output(rpi_connections["green_LED"],GPIO.LOW)
                 
                 pond.set_state0_entry(False) # exit state cleanly
@@ -134,7 +135,7 @@ def main():
                 
                 # turn lights off
                 GPIO.output(rpi_connections["red_LED"],GPIO.LOW)
-                GPIO.output(rpi_connections["yellow_LED"],GPIO.LOW)
+                GPIO.output(rpi_connections["blue_LED"],GPIO.LOW)
                 GPIO.output(rpi_connections["green_LED"],GPIO.LOW)
                 
                 pond.set_state0_entry(False) # exit state cleanly
@@ -154,7 +155,6 @@ def main():
                 
                 pond.reset_timer('first_drought')
                 pond.set_state5_entry(True)
-                print_w_time('- entered state 5: first drought')
 
             # leave state
             
@@ -190,8 +190,6 @@ def main():
                 
                 GPIO.output(rpi_connections["green_LED"],GPIO.HIGH) # turn green light on
 
-                print_w_time('- entered state 10: drought')
-
             # leave state
 
             # timer based
@@ -224,9 +222,8 @@ def main():
                 pond.reset_timer('flood') # update flood timer to current RPi time
                 pond.set_state20_entry(True)
                 
-                GPIO.output(rpi_connections["yellow_LED"],GPIO.HIGH) # turn on yellow light
+                GPIO.output(rpi_connections["blue_LED"],GPIO.HIGH) # turn on blue light
                 
-                print_w_time('- entered state 20: flood')
 
             # leave state
 
@@ -237,7 +234,7 @@ def main():
                 bus.write_byte_data(rpi_connections['relay_addr'], rpi_connections['device_bus'], 0x00)
                 print_w_time("- solenoid closed")
                 
-                GPIO.output(rpi_connections["yellow_LED"],GPIO.LOW) # turn off yellow light
+                GPIO.output(rpi_connections["blue_LED"],GPIO.LOW) # turn off blue light
                 pond.set_state20_entry(False)
                 next_state = 10 # go to regular drought
 
@@ -245,7 +242,7 @@ def main():
             if command == 'shutdown':
                 
                 # TODO close the solenoid
-                GPIO.output(rpi_connections["yellow_LED"],GPIO.LOW) # turn off yellow light
+                GPIO.output(rpi_connections["blue_LED"],GPIO.LOW) # turn off blue light
                 pond.set_state20_entry(False) # exit state cleanly
                 next_state = 99 # go to first drought
 
@@ -255,9 +252,10 @@ def main():
 
             if pond.get_state99_entry() == False: # get into state
 
+                print_w_time("- entered state 99: shutdown, shutting down system and killing script")
+
                 shutdown_pond(rpi_connections) # turns off lights, closes solenoid
                 pond.set_state99_entry(True)
-                print_w_time("- entered state 99: shutdown, shutting down system and killing script")
                 time.sleep(0.5)
                 sys.exit() # kill program
 
@@ -265,7 +263,7 @@ def main():
 
         # heartbeat timer
         if (datetime.now() - pond.get_timer_current_time('heartbeat')).total_seconds() > pond.get_timer_duration('heartbeat'):
-            print_w_time("heartbeat (script is still running)")
+            print_w_time("- heartbeat (script is still running)")
             pond.reset_timer('heartbeat')
 
 
