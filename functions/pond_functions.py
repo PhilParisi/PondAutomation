@@ -1,6 +1,8 @@
 import sys
 import os
 import csv
+import smbus
+import RPi.GPIO as GPIO
 from datetime import datetime
 
 
@@ -218,7 +220,7 @@ class Pond:
             print(f"- timer '{timer_name}' already exists, skipping timer creation in add_timer()")
         else:
             time_to_store = datetime.now()
-            self.timers[timer_name] = {'duration': round(duration*60), 'current_time': time_to_store} # store the inputted duration and the current_time
+            self.timers[timer_name] = {'duration': (duration*60), 'current_time': time_to_store} # store the inputted duration and the current_time
             #print(f"- timer '{timer_name}' added")
 
     # reset_timer() allows the user to reset the timer to the current time. This should be done when switching into a new state that needs to be timed
@@ -247,3 +249,51 @@ class Pond:
             print(f"- timer '{timer_name}' does not exist, skipping get_timer_current_time() function")
 
 
+# kill at the connections the raspberrypi pas
+def shutdown_pond(rpi_connections):
+    
+    # setup the pins again, in order to prevent error messages
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setwarnings(False)
+    GPIO.setup(rpi_connections["red_LED"],GPIO.OUT)
+    GPIO.setup(rpi_connections["blue_LED"],GPIO.OUT)
+    GPIO.setup(rpi_connections["green_LED"],GPIO.OUT)
+
+    # turn LEDs off
+    shutdown_lights(rpi_connections)
+
+    # turn solenoid off
+    shutdown_solenoid(rpi_connections)
+    
+    
+def shutdown_lights(rpi_connections):
+    GPIO.output(rpi_connections["red_LED"],GPIO.LOW)
+    GPIO.output(rpi_connections["blue_LED"],GPIO.LOW)
+    GPIO.output(rpi_connections["green_LED"],GPIO.LOW)
+
+
+def shutdown_solenoid(rpi_connections):
+    
+    # Setup I2C w/ Relay
+    bus = smbus.SMBus(rpi_connections['device_bus'])
+    
+    # shut solenoid
+    bus.write_byte_data(rpi_connections['relay_addr'], rpi_connections['device_bus'], 0x00)
+
+    print("- solenoid closed")
+
+    
+# this function is similar to the print() function, except it prints messages with a timestamp in front 
+def print_w_time(message):
+    
+    # Get the current date and time
+    current_time = datetime.now()
+
+    # Format the time to include only two decimal places
+    formatted_time = current_time.strftime("- %Y-%m-%d %H:%M:%S.%f")[:-5]
+
+    # Combine the formatted time and the message
+    result = f"{formatted_time} // {message}"
+
+    # Print the result
+    print(result)

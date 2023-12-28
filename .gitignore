@@ -1,2 +1,5 @@
-# files and folder to ignore
+# file and folders to ignore (not push to remote repo)
+# ignore the files in data
 data/
+
+__pycache__/
