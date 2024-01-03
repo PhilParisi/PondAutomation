@@ -1,9 +1,11 @@
 import sys
 import os
 import csv
-import smbus
-import RPi.GPIO as GPIO
-from datetime import datetime
+import argparse
+import importlib.util
+#import smbus
+#import RPi.GPIO as GPIO
+from datetime import datetime, timedelta
 
 
 def update_pond_settings(settings):
@@ -42,7 +44,16 @@ def ask_user_about_settings(pond):
     else:    
         print("- invalid input, please re-run script")
         pond.set_error_status(True)
-    
+
+
+def print_pond_settings(pond):
+
+    pond_settings = pond.get_settings()
+
+    # show user the key:value pairs of the dictionary for their approval
+    for key, value in pond_settings.items():
+        print(f"Current setting for {key}: {value}")    
+
 
 def create_folder(folder_name):
     try:
@@ -74,6 +85,14 @@ def get_user_pond_settings():
         "drought_duration": user_input3,
         "total_program_runtime": total_program_runtime
     }
+
+    return pond_settings
+
+
+def correct_pond_settings(pond_settings):
+
+    if pond_settings["total_program_runtime"] == 0: # no program ending
+        pond_settings["total_program_runtime"] = float('inf')
 
     return pond_settings
 
@@ -112,6 +131,10 @@ class Pond:
         # all states start off as False, and switch to True when getting into that state
         # general 'state' is used for switching between states in the control loop
         self.state = 0
+        self.state_name = None # the textual name given to a state
+        self.next_state = 0
+        self.command = 0
+
         self.state0_entry = False # initialization [start in this state]
         self.state5_entry = False # first drought [waiting, no flow]
         self.state10_entry = False # regular drought [waiting, no flow]
@@ -123,6 +146,11 @@ class Pond:
                                     # the 'sub-dictionary' stores
                                         # -  DURATIONS in MINUTES (e.g every 40 minutes we have a drought)
                                         # -  the current time that was present when resetting the time (e.g. the time a flood starts, so we can use this as a baseline to count the duration off of)
+
+        # power outage
+        self.power_outage_filename = "configs/outage.csv"
+        self.config_file_used = None
+        self.state_just_switched = 0
 
 
     # GETTERS and SETTERS
@@ -139,11 +167,11 @@ class Pond:
     def set_error_status(self, status):
         self.has_error = status
 
-    def get_pond_state(self):
-        return self.pond_state
+    #def get_pond_state(self):
+    #    return self.pond_state
     
-    def set_pond_state(self, state):
-        self.pond_state = state
+    #def set_pond_state(self, state):
+    #    self.pond_state = state
 
     def get_name_for_output_folder(self):
         return self.name_for_output_folder
@@ -165,6 +193,18 @@ class Pond:
 
     def get_setting(self, key):
         return self.settings.get(key, None)
+    
+    def get_power_outage_filename(self):
+        return self.power_outage_filename
+    
+    def set_power_ouage_filename(self, filename):
+        self.power_outage_filename = filename
+
+    def get_config_file_used(self):
+        return self.config_file_used
+
+    def set_config_file_used(self, config_used):
+        self.config_file_used = config_used
 
 
     # CONTROL STATE FUNCTIONS
@@ -174,6 +214,28 @@ class Pond:
     
     def set_state(self, state):
         self.state = state
+        self.set_state_name() # setter for set_state_name embedded here
+    
+    def get_state_name(self):
+        return self.state_name
+
+    def get_next_state(self):
+        return self.next_state
+
+    def set_next_state(self, next_state):
+        self.next_state = next_state
+
+    def get_command(self):
+        return self.command
+    
+    def set_command(self, command):
+        self.command = command
+
+    def get_state_just_switched(self):
+        return self.state_just_switched
+    
+    def set_state_just_switched(self, val):
+        self.state_just_switched = val
 
     def get_state0_entry(self):
         return self.state0_entry
@@ -204,6 +266,21 @@ class Pond:
     
     def set_state99_entry(self, entered):
         self.state0_entry = entered
+
+
+    def set_state_name(self):
+        
+        if self.state == 0:
+            self.state_name = "initialization"
+        if self.state == 5:
+            self.state_name = "first_drought"
+        if self.state == 10:
+            self.state_name = "drought"
+        if self.state == 20:
+            self.state_name = "flood"
+        if self.state == 99:
+            self.state_name = "shutdown"
+
 
 
     # TIMER FUNCTIONS
@@ -247,6 +324,116 @@ class Pond:
             return self.timers[timer_name]['current_time']
         else:
             print(f"- timer '{timer_name}' does not exist, skipping get_timer_current_time() function")
+
+    # set_timer_current_time() is used for continuing the script after outages. this is equivalent to reset_timer() but using an inputted time instead of timenow()
+    def set_timer_current_time(self, timer_name, new_time):
+
+        if timer_name in self.timers: # ensure the timer exists
+            self.timers[timer_name]['current_time'] = new_time # update the current_time with inputted time
+ 
+        else:
+            print(f"- timer '{timer_name}' does not exist, skipping reset_timer() function")      
+
+
+    # POWER OUTAGE FUNCTIONS
+    def update_pond_with_outage_settings(self):
+
+        # only if there is a outage.csv will we attempt to read it
+        if os.path.exists(self.get_power_outage_filename()):
+
+            # pull in old outage csv
+            outage_dict = csv_to_dict(self.get_power_outage_filename())
+
+            # check if autorestart is set (1 means yes autostart, 0 means don't autostart and go normally)
+            if outage_dict["autostart"] == 1:
+
+                # when autorestarting, we want to update the next_state, the current state timer, and the total runtime
+                print_w_time("\n***CONTINUING FROM POWER OUTAGE/CYCLE***\n")
+
+                # assign next state (pickup up in the same state as stated in file)
+                self.set_next_state(outage_dict["state"]) # the actual pond.state attribute gets set in the loop)
+        
+                # update state timer (we've already been in state, and timer holds time when we got INTO state, so do datetime - mins_in_state)
+                    # note: timers are in seconds, csv are in minutes
+                self.set_timer_current_time(datetime.now() - timedelta(outage_dict["mins_in_state"]*60))
+
+                # update total runtime timer
+                self.set_timer_current_time(datetime.now() - timedelta(outage_dict["mins_total_runtime"]*60))
+
+        # then prep_for_power_outage (delete old csv, make new one), regardles of autorestart
+        self.prep_for_power_outage()
+
+
+    def prep_for_power_outage(self):
+
+        # remove any old outage.csv files, get filename first
+        file_path = self.get_power_outage_filename()
+
+        # check if the file exists before attempting to delete
+        if os.path.exists(file_path):
+            os.remove(file_path)
+            print(f"Old '{file_path}' deleted successfully.")
+        else:
+            print(f"Old '{file_path}' does not exist.")
+
+        # create a new outage.csv
+        #if self.settings["pond_autorestart_after_outage"] == 1:
+        self.create_outage_csv_file(self.get_power_outage_filename())
+        print(f'New "{self.get_power_outage_filename()}" created for outages')
+
+
+    def create_outage_csv_file(self, filename):
+        
+        # define the data to be written to the csv file
+        data = [
+            ['autostart', self.settings["pond_autorestart_after_outage"]],
+            ['config', self.get_config_file_used()],
+            ['state', "None"],
+            ['mins_in_state', "None"],
+            ['mins_total_runtime', "None"],
+            ['last_updated', datetime.now()]
+        ]
+
+        # Open the file in write mode and create a CSV writer
+        with open(filename, mode='w', newline='') as file:
+            writer = csv.writer(file)
+
+            # Write the data to the csv file
+            writer.writerows(data)
+
+        #print(f"CSV file '{filename}' updated")
+            
+
+    def update_outage_csv(self):    
+
+        # check if the power outage file exists before attempting to add to it
+        if os.path.exists(self.get_power_outage_filename()):
+            
+            data = [
+                ['state', self.get_state()],
+                ['mins_in_state', round(((datetime.now() - self.get_timer_current_time(self.get_state_name())).total_seconds() / 60), 3)],
+                ['mins_total_runtime', round(((datetime.now() - self.get_timer_current_time('program_runtime')).total_seconds() / 60), 3)],
+                ['last_updated', datetime.now()]
+            ]
+
+            # Path to the CSV file
+            csv_file_path = self.get_power_outage_filename()
+
+            # Read existing CSV content
+            with open(csv_file_path, 'r', newline='') as file:
+                reader = csv.reader(file)
+                lines = list(reader)
+
+                # Overwrite data in lines (rows 3, 4, 5 in csv)
+                lines[2:6] = data
+
+            # Write updated content back to the CSV file
+            with open(csv_file_path, 'w', newline='') as file:
+                writer = csv.writer(file)
+                writer.writerows(lines)
+
+        else: # file does not exist
+            return
 
 
 # kill at the connections the raspberrypi pas
@@ -297,3 +484,25 @@ def print_w_time(message):
 
     # Print the result
     print(result)
+
+
+def load_config(file_path):
+    spec = importlib.util.spec_from_file_location("pond_settings", file_path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.pond_settings_from_file
+
+
+def csv_to_dict(csv_file):
+    result_dict = {}
+
+    with open(csv_file, 'r') as file:
+        csv_reader = csv.reader(file)
+        for row in csv_reader:
+            # Assuming the CSV has at least two columns
+            if len(row) >= 2:
+                key = row[0]
+                value = row[1]
+                result_dict[key] = value
+
+    return result_dict
