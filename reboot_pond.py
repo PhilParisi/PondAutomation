@@ -24,9 +24,11 @@ def main():
         if int(outage_dict.get("autostart", 0)) == 1: # type cast to integer, default val is 0 is the dict key doesn't exist
 
             # execute the autopond script in a new detached tmux session named autopond_reboot with proper configs
-            command = "tmux new-session -d -s autopond_reboot 'python3 automate_pond.py --config "
-            command += outage_dict["config"]
-            command += "'" # essential ending ' to the shell command
+            #command = "tmux new-session -d 'python3 automate_pond.py --config "
+            #command += outage_dict["config"]
+            #command += "'" # essential ending ' to the shell command
+            config_path = outage_dict["config"]
+            command = f"tmux new-session -d 'python3 automate_pond.py --config {config_path}'"
 
             # run the command using subprocess as a shell command
             print(command)
