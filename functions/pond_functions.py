@@ -363,11 +363,11 @@ class Pond:
         
                 # update state timer (we've already been in state, and timer holds time when we got INTO state, so do datetime - mins_in_state)
                     # note: timers are in seconds, csv are in minutes
-                the_prev_state = int(outage_dict['state']) # this gives a numerical value
+                the_prev_state = outage_dict['state'] # this gives  text 
                 print(the_prev_state)
-                the_prev_state_name = self.get_state_name(the_prev_state) # this gives the textual name of the state
-                print(the_prev_state_name)
-                self.set_timer_current_time(the_prev_state_name, datetime.now() - timedelta(float(outage_dict["mins_in_state"])*60))
+                #the_prev_state_name = self.get_state_name(the_prev_state) # this gives the textual name of the state
+                #print(the_prev_state_name)
+                self.set_timer_current_time(the_prev_state, datetime.now() - timedelta(float(outage_dict["mins_in_state"])*60))
 
                 # update total runtime timer
                 self.set_timer_current_time('program_runtime', datetime.now() - timedelta(float(outage_dict["mins_total_runtime"])*60))
@@ -422,7 +422,7 @@ class Pond:
         if os.path.exists(self.get_power_outage_filename()):
             
             data = [
-                ['state', self.get_state()],
+                ['state', self.get_state_name()], # keep this in text form
                 ['mins_in_state', round(((datetime.now() - self.get_timer_current_time(self.get_state_name())).total_seconds() / 60), 3)],
                 ['mins_total_runtime', round(((datetime.now() - self.get_timer_current_time('program_runtime')).total_seconds() / 60), 3)],
                 ['last_updated', datetime.now()]
