@@ -346,8 +346,14 @@ class Pond:
             # pull in old outage csv
             outage_dict = csv_to_dict(self.get_power_outage_filename())
 
+            print(outage_dict["autostart"])
+            print(int(outage_dict["autostart"]))
+
+            print(outage_dict["mins_in_state"])
+            print(float(outage_dict["mins_in_state"]))
+
             # check if autorestart is set (1 means yes autostart, 0 means don't autostart and go normally)
-            if outage_dict["autostart"] == 1:
+            if int(outage_dict["autostart"]) == 1:
 
                 # when autorestarting, we want to update the next_state, the current state timer, and the total runtime
                 print_w_time("\n***CONTINUING FROM POWER OUTAGE/CYCLE***\n")
@@ -357,10 +363,10 @@ class Pond:
         
                 # update state timer (we've already been in state, and timer holds time when we got INTO state, so do datetime - mins_in_state)
                     # note: timers are in seconds, csv are in minutes
-                self.set_timer_current_time(datetime.now() - timedelta(outage_dict["mins_in_state"]*60))
+                self.set_timer_current_time(datetime.now() - timedelta(float(outage_dict["mins_in_state"])*60))
 
                 # update total runtime timer
-                self.set_timer_current_time(datetime.now() - timedelta(outage_dict["mins_total_runtime"]*60))
+                self.set_timer_current_time(datetime.now() - timedelta(float(outage_dict["mins_total_runtime"])*60))
 
         # then prep_for_power_outage (delete old csv, make new one), regardles of autorestart
         self.prep_for_power_outage()
