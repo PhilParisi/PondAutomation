@@ -359,11 +359,11 @@ class Pond:
                 print("\n***CONTINUING FROM POWER OUTAGE/CYCLE***\n")
 
                 # assign next state (pickup up in the same state as stated in file)
-                self.set_next_state(outage_dict["state"]) # the actual pond.state attribute gets set in the loop)
-        
+                self.set_next_state(int(outage_dict["state"])) # the actual pond.state attribute gets set in the loop, this gives a numeric value
+                
                 # update state timer (we've already been in state, and timer holds time when we got INTO state, so do datetime - mins_in_state)
                     # note: timers are in seconds, csv are in minutes
-                the_prev_state = outage_dict['state'] # this gives  text 
+                the_prev_state = outage_dict["state_name"] # this gives text 
                 print(the_prev_state)
                 #the_prev_state_name = self.get_state_name(the_prev_state) # this gives the textual name of the state
                 #print(the_prev_state_name)
@@ -401,6 +401,7 @@ class Pond:
             ['autostart', self.settings["pond_autorestart_after_outage"]],
             ['config', self.get_config_file_used()],
             ['state', "None"],
+            ['state_name', "None"]
             ['mins_in_state', "None"],
             ['mins_total_runtime', "None"],
             ['last_updated', datetime.now()]
@@ -422,7 +423,8 @@ class Pond:
         if os.path.exists(self.get_power_outage_filename()):
             
             data = [
-                ['state', self.get_state_name()], # keep this in text form
+                ['state', self.get_state()], # keep this as numeric
+                ['state_name', self.get_state_name()], # keep this as text
                 ['mins_in_state', round(((datetime.now() - self.get_timer_current_time(self.get_state_name())).total_seconds() / 60), 3)],
                 ['mins_total_runtime', round(((datetime.now() - self.get_timer_current_time('program_runtime')).total_seconds() / 60), 3)],
                 ['last_updated', datetime.now()]
@@ -437,7 +439,7 @@ class Pond:
                 lines = list(reader)
 
                 # Overwrite data in lines (rows 3, 4, 5 in csv)
-                lines[2:6] = data
+                lines[2:7] = data
 
             # Write updated content back to the CSV file
             with open(csv_file_path, 'w', newline='') as file:
