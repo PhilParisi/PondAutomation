@@ -29,6 +29,7 @@ def main():
             command += "'" # essential ending ' to the shell command
 
             # run the command using subprocess as a shell command
+            print(command)
             subprocess.run(command, shell=True)
 
             print('autostart set to 1, pond is restarting where it left off previously...')
