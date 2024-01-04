@@ -401,7 +401,7 @@ class Pond:
             ['autostart', self.settings["pond_autorestart_after_outage"]],
             ['config', self.get_config_file_used()],
             ['state', "None"],
-            ['state_name', "None"]
+            ['state_name', "None"],
             ['mins_in_state', "None"],
             ['mins_total_runtime', "None"],
             ['last_updated', datetime.now()]
