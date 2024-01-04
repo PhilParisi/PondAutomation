@@ -3,8 +3,8 @@ import os
 import csv
 import argparse
 import importlib.util
-#import smbus
-#import RPi.GPIO as GPIO
+import smbus
+import RPi.GPIO as GPIO
 from datetime import datetime, timedelta
 
 
@@ -466,7 +466,6 @@ def shutdown_solenoid(rpi_connections):
     
     # shut solenoid
     bus.write_byte_data(rpi_connections['relay_addr'], rpi_connections['device_bus'], 0x00)
-
     print("- solenoid closed")
 
     
