@@ -20,7 +20,7 @@ from functions.pond_functions import *
 # define the main function (call it at end of this file)
 def main():
 
-
+    # parse the --config argument (users no longer prompted for inputs)
     parser = argparse.ArgumentParser(description='Automate pond based on configuration file')
     parser.add_argument('--config', help='Path to the configuration file', required=True)
     args = parser.parse_args()
@@ -35,24 +35,20 @@ def main():
     # Setup I2C w/ Relay
     bus = smbus.SMBus(rpi_connections['device_bus'])
     
-    # turn OFF solenoid (0x00 is 0 min) [close it --> no flow]
+    # turn OFF solenoid (0x00 is 0 min) [close it --> no flow] (this is a precaution)
     bus.write_byte_data(rpi_connections['relay_addr'], rpi_connections['device_bus'], 0x00)
     print("- solenoid closed")
     
 
     print("\n*** POND AUTOMATION PARAMETERS ***\n")
-    #print("- user inputs loaded from configs/pond_settings.py")
 
-    # obtain user inputs, create an instance of the pond class
-
-    # Change 1
     #pond_settings = get_user_pond_settings()
     #pond = Pond(pond_settings_from_file)
     pond = Pond(pond_settings_config_style)
     pond.set_config_file_used(config_file_path)
     print("- user inputs loaded from ", pond.get_config_file_used())
     
-    # check if the pond settings are correct, kill script if modifications are needed
+    # output pond settings, kill script if modifications are needed
     print("- see below settings (note: times are in minutes)")
     print_pond_settings(pond)
     #ask_user_about_settings(pond)
@@ -71,8 +67,6 @@ def main():
     # Setup Core Timers
         # TODO one timer controls the rate we write each line to a CSV
         # TODO one timer controls the rate we finish a given CSV and start a new one
-        # - one timer counts the drought (and first drought)
-        # - one timer tracks the flood
         # times should be in minutes
     
     pond.add_timer('drought', pond.get_setting('drought_duration'))
@@ -83,7 +77,7 @@ def main():
     pond.add_timer('heartbeat', 0.5) # frequent outputs and logging
 
     # Setup GPIO Pins (RPi pins)
-    GPIO.setmode(GPIO.BCM) # use the GPIOXX (not the physical pin#)
+    GPIO.setmode(GPIO.BCM) # set to use the GPIOXX (not the physical pin#)
     GPIO.setwarnings(False)
 
     GPIO.setup(rpi_connections["red_LED"],GPIO.OUT)
@@ -95,7 +89,7 @@ def main():
     print("\n*** STARTING POND AUTOMATION LOOP ***\n")
 
     # prep for power outage!
-    print('prep for outage')
+    print('- prep for outage')
     pond.update_pond_with_outage_settings() # won't affect next_state unless autorestart is set in outage.csv
     #pond.set_next_state(0) start off in initialization mode, and pond.set_command(0) are default in Pond class
 
@@ -248,8 +242,8 @@ def main():
             if (datetime.now() - pond.get_timer_current_time('flood')).total_seconds() > pond.get_timer_duration('flood'):
                 
                 # shut solenoid
-                bus.write_byte_data(rpi_connections['relay_addr'], rpi_connections['device_bus'], 0x00)
-                print_w_time("- solenoid closed")
+                #bus.write_byte_data(rpi_connections['relay_addr'], rpi_connections['device_bus'], 0x00)
+                #print_w_time("- solenoid closed")
                 
                 GPIO.output(rpi_connections["blue_LED"],GPIO.LOW) # turn off blue light
                 pond.set_state20_entry(False)
@@ -258,7 +252,6 @@ def main():
             # shutdown command
             if pond.get_command() == 'shutdown':
                 
-                # TODO close the solenoid
                 GPIO.output(rpi_connections["blue_LED"],GPIO.LOW) # turn off blue light
                 pond.set_state20_entry(False) # exit state cleanly
                 pond.set_next_state(99) # go to first drought
