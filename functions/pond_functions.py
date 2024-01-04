@@ -363,7 +363,8 @@ class Pond:
         
                 # update state timer (we've already been in state, and timer holds time when we got INTO state, so do datetime - mins_in_state)
                     # note: timers are in seconds, csv are in minutes
-                the_prev_state = outage_dict['state'] # this gives a numerical value
+                the_prev_state = int(outage_dict['state']) # this gives a numerical value
+                print(the_prev_state)
                 the_prev_state_name = self.get_state_name(the_prev_state) # this gives the textual name of the state
                 print(the_prev_state_name)
                 self.set_timer_current_time(the_prev_state_name, datetime.now() - timedelta(float(outage_dict["mins_in_state"])*60))
