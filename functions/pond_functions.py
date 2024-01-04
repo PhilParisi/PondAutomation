@@ -341,6 +341,8 @@ class Pond:
         # only if there is a outage.csv will we attempt to read it
         if os.path.exists(self.get_power_outage_filename()):
 
+            print('abc')
+
             # pull in old outage csv
             outage_dict = csv_to_dict(self.get_power_outage_filename())
 
