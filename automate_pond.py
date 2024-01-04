@@ -310,9 +310,9 @@ if __name__ == "__main__":
 
         # remove outage.csv file, so next time we run we start fresh
         # why remove? because a human is ending the program, which means a human has to start a new one
-        if os.path.exists("configs/outage.csv"):
-            os.remove("configs/outage.csv")
-            print_w_time('removed outage.csv')
+        #if os.path.exists("configs/outage.csv"):
+        #    os.remove("configs/outage.csv")
+        #    print_w_time('removed outage.csv')
 
         print("Pond has been shut down")
         
