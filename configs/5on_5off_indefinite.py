@@ -16,6 +16,6 @@ pond_settings_from_file = {
 
     # would you like the pond to automatically start back up after being powered off? good idea if you expect power outages
     # 1 means 'yes', 0 means 'no'
-    'pond_autorestart_after_outage':0
+    'pond_autorestart_after_outage':1
 
 }

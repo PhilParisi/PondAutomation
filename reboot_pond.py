@@ -32,7 +32,7 @@ def main():
             # check if the auto_pond.py configuration file exists
             if os.path.exists(config_path):
 
-                command = f"tmux new-session -d 'python3 automate_pond.py --config {config_path}'"
+                command = f"tmux new-session -d -s pond_reboot 'python3 automate_pond.py --config {config_path}'"
 
                 # run the command using subprocess as a shell command
                 print(command)
