@@ -28,14 +28,20 @@ def main():
             #command += outage_dict["config"]
             #command += "'" # essential ending ' to the shell command
             config_path = outage_dict["config"]
-            command = f"tmux new-session -d 'python3 automate_pond.py --config {config_path}'"
 
-            # run the command using subprocess as a shell command
-            print(command)
-            subprocess.run(command, shell=True)
+            # check if the auto_pond.py configuration file exists
+            if os.path.exists(config_path):
 
-            print('autostart set to 1, pond is restarting where it left off previously...')
+                command = f"tmux new-session -d 'python3 automate_pond.py --config {config_path}'"
 
+                # run the command using subprocess as a shell command
+                print(command)
+                subprocess.run(command, shell=True)
+
+                print('autostart set to 1, pond is restarting where it left off previously...')
+
+            else:
+                print("configuration path did not exist, this likely caused issues with launching the tmux session")
 
     # else, we don't start the pond after boot.
     else:
@@ -51,6 +57,6 @@ if __name__ == "__main__":
         print("\nUser shut down program with CTRL+C.")
     finally: 
 
-        print("reboot_pond.py finished.")
+        print("reboot_pond.py finished. check to ensure tmux is running with --> tmux list-sessions")
         
             
