@@ -15,6 +15,8 @@ def main():
     # only if there is a outage.csv will we attempt to read it
     if os.path.exists(filename):
 
+        print('outage file exists')
+
         # pull in old outage csv
         outage_dict = csv_to_dict(filename)
 
@@ -29,7 +31,12 @@ def main():
             # run the command using subprocess as a shell command
             subprocess.run(command, shell=True)
 
+            print('autostart set to 1, pond is restarting where it left off previously...')
+
+
     # else, we don't start the pond after boot.
+    else:
+        print('no outage file exists, pond is not autorestarting')
             #there's no outage.csv (or if there is, autostart == 0) from the previous automate_pond.py so the settings didn't specify rebooting automatically
 
 
@@ -41,6 +48,6 @@ if __name__ == "__main__":
         print("\nUser shut down program with CTRL+C.")
     finally: 
 
-        print("reboot_pond.py shutdown successful.")
+        print("reboot_pond.py finished.")
         
             
