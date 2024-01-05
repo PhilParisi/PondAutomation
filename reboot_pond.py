@@ -9,8 +9,8 @@ from functions.pond_functions import *
 
 def main():
     
-    # hardcoded outage filename
-    filename = "configs/outage.csv"
+    # hardcoded outage filename (must be explicit, not relative filepath)
+    filename = "~/PondAutomation/configs/outage.csv"
 
     # only if there is a outage.csv will we attempt to read it
     if os.path.exists(filename):
@@ -32,7 +32,7 @@ def main():
             # check if the auto_pond.py configuration file exists
             if os.path.exists(config_path):
 
-                command = f"tmux new-session -d -s pond_reboot 'python3 automate_pond.py --config {config_path}'"
+                command = f"tmux new-session -d -s pond_reboot 'python3 ~/PondAutomation/automate_pond.py --config {config_path}'"
 
                 # run the command using subprocess as a shell command
                 print(command)
