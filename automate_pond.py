@@ -281,13 +281,6 @@ def main():
 
         # SYSTEM CHECKS AND UPDATES
         
-        # update if state just switched
-        if (pond.get_state() != pond.get_next_state()):
-            pond.set_state_just_switched(True)
-            pond.set_trigger_heartbeat(True)
-        else:
-            pond.set_state_just_switched(False)
-
         # update heartbeat timing
         if (datetime.now() - pond.get_timer_current_time('heartbeat')).total_seconds() > pond.get_timer_duration('heartbeat'):
             pond.set_trigger_heartbeat(True) 
@@ -307,7 +300,12 @@ def main():
             pond.set_trigger_heartbeat(False)
 
 
-
+        # update if state just switched (this should happen AFTER the heartbeat functions)
+        if (pond.get_state() != pond.get_next_state()):
+            pond.set_state_just_switched(True)
+            pond.set_trigger_heartbeat(True)
+        else:
+            pond.set_state_just_switched(False)
 
 
 

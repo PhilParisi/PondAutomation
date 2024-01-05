@@ -10,7 +10,7 @@ from functions.pond_functions import *
 def main():
     
     # hardcoded outage filename (must be explicit, not relative filepath)
-    filename = "~/PondAutomation/configs/outage.csv"
+    filename = "home/pond/PondAutomation/configs/outage.csv"
 
     # only if there is a outage.csv will we attempt to read it
     if os.path.exists(filename):
