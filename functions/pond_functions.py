@@ -156,7 +156,10 @@ class Pond:
         # power outage
         self.power_outage_filename = "configs/outage.csv"
         self.config_file_used = None
-        self.state_just_switched = 0
+        self.state_just_switched = False
+
+        # heartbeat
+        self.trigger_heartbeat = True
 
 
     # GETTERS and SETTERS
@@ -312,8 +315,6 @@ class Pond:
             self.set_state10_reset_timer(val)
         if timer_name == "flood":
             self.set_state20_reset_timer(val)
- 
-
 
     def set_state_name(self):
         
@@ -328,7 +329,11 @@ class Pond:
         if self.state == 99:
             self.state_name = "shutdown"
 
-
+    def get_trigger_heartbeat(self):
+        return self.trigger_heartbeat
+    
+    def set_trigger_heartbeat(self, val):
+        self.trigger_heartbeat = val
 
     # TIMER FUNCTIONS
 
@@ -412,6 +417,9 @@ class Pond:
                 # update total runtime timer
                 self.set_timer_current_time('program_runtime', datetime.now() - timedelta(seconds=float(outage_dict["mins_total_runtime"])*60))
                 #print(datetime.now() - timedelta(seconds=float(outage_dict["mins_total_runtime"])*60))
+
+                # trigger a heartbeat to record these new values into outage.csv
+                self.set_trigger_heartbeat(True)
 
         # then prep_for_power_outage (delete old csv, make new one), regardles of autorestart
         self.prep_for_power_outage()

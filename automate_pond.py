@@ -279,11 +279,23 @@ def main():
                 sys.exit() # kill program
 
 
+        # SYSTEM CHECKS AND UPDATES
+        
+        # update if state just switched
+        if (pond.get_state() != pond.get_next_state()):
+            pond.set_state_just_switched(True)
+            pond.set_trigger_heartbeat(True)
+        else:
+            pond.set_state_just_switched(False)
 
-        # HEARTBEAT (triggered by time or if the next_state != current_state)
+        # update heartbeat timing
+        if (datetime.now() - pond.get_timer_current_time('heartbeat')).total_seconds() > pond.get_timer_duration('heartbeat'):
+            pond.set_trigger_heartbeat(True) 
+
+
+        # HEARTBEAT (triggered by time, if the next_state != current_state, after the first loop, other events)
                 
-        if (datetime.now() - pond.get_timer_current_time('heartbeat')).total_seconds() > pond.get_timer_duration('heartbeat') or pond.get_state_just_switched() == 1:
-            
+        if pond.get_trigger_heartbeat() == True:
             # print heart beat
             print_w_time("- heartbeat (script is still running)")
             pond.reset_timer('heartbeat')
@@ -291,12 +303,12 @@ def main():
             # update power outage csv with current_state and time_in_state (regardless of autorestart)
             pond.update_outage_csv()
 
+            # set the trigger back to false
+            pond.set_trigger_heartbeat(False)
 
-        # update if state just switched
-        if (pond.get_state() != pond.get_next_state()):
-            pond.set_state_just_switched(1)
-        else:
-            pond.set_state_just_switched(0)
+
+
+
 
 
         # TODO: write sensor data to csv, based on timer with sampling-freq user input??
