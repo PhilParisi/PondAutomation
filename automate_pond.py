@@ -164,7 +164,9 @@ def main():
                 bus.write_byte_data(rpi_connections['relay_addr'], rpi_connections['device_bus'], 0x00)
                 print_w_time("- solenoid closed")
                 
-                pond.reset_timer('first_drought')
+                if pond.get_state5_reset_timer() == True:
+                    pond.reset_timer('first_drought')
+
                 pond.set_state5_entry(True)
 
             # leave state
@@ -173,6 +175,7 @@ def main():
             if (datetime.now() - pond.get_timer_current_time('first_drought')).total_seconds() > pond.get_timer_duration('first_drought'): 
 
                 pond.set_state5_entry(False)
+                pond.set_state5_reset_timer(True)
                 GPIO.output(rpi_connections["green_LED"],GPIO.LOW) # turn off green light
                 pond.set_next_state(20) # go to flood
 
@@ -180,6 +183,7 @@ def main():
             if pond.get_command() == 'shutdown':
 
                 pond.set_state5_entry(False) # exit state cleanly
+                pond.set_state5_reset_timer(True)
                 GPIO.output(rpi_connections["green_LED"],GPIO.LOW) # turn off green light
                 pond.set_next_state(99) # go to first drought
 
@@ -196,7 +200,8 @@ def main():
                 bus.write_byte_data(rpi_connections['relay_addr'], rpi_connections['device_bus'], 0x00)
                 print_w_time("- solenoid closed")
                 
-                pond.reset_timer('drought') # update drought timer to current RPi time
+                if pond.get_state10_reset_timer() == True:
+                    pond.reset_timer('drought') # update drought timer to current RPi time
                 pond.set_state10_entry(True)
                 
                 GPIO.output(rpi_connections["green_LED"],GPIO.HIGH) # turn green light on
@@ -207,14 +212,16 @@ def main():
             if (datetime.now() - pond.get_timer_current_time('drought')).total_seconds() > pond.get_timer_duration('drought'):
                 
                 pond.set_state10_entry(False)
+                pond.set_state10_reset_timer(True)
                 GPIO.output(rpi_connections["green_LED"],GPIO.LOW) # turn green light off
                 pond.set_next_state(20) # go to flood
 
             # shutdown command
             if pond.get_command() == 'shutdown':
 
-                GPIO.output(rpi_connections["green_LED"],GPIO.LOW) # turn green light off
                 pond.set_state10_entry(False) # exit state cleanly
+                pond.set_state10_reset_timer(True)
+                GPIO.output(rpi_connections["green_LED"],GPIO.LOW) # turn green light off
                 pond.set_next_state(99) # go to first drought
 
 
@@ -230,7 +237,8 @@ def main():
                 bus.write_byte_data(rpi_connections['relay_addr'], rpi_connections['device_bus'], 0xFF)
                 print_w_time("- solenoid open")
 
-                pond.reset_timer('flood') # update flood timer to current RPi time
+                if pond.get_state20_reset_timer() == True:
+                    pond.reset_timer('flood') # update flood timer to current RPi time
                 pond.set_state20_entry(True)
                 
                 GPIO.output(rpi_connections["blue_LED"],GPIO.HIGH) # turn on blue light
@@ -247,6 +255,7 @@ def main():
                 
                 GPIO.output(rpi_connections["blue_LED"],GPIO.LOW) # turn off blue light
                 pond.set_state20_entry(False)
+                pond.set_state20_reset_timer(True)
                 pond.set_next_state(10) # go to regular drought
 
             # shutdown command
@@ -254,6 +263,7 @@ def main():
                 
                 GPIO.output(rpi_connections["blue_LED"],GPIO.LOW) # turn off blue light
                 pond.set_state20_entry(False) # exit state cleanly
+                pond.set_state20_reset_timer(True)
                 pond.set_next_state(99) # go to first drought
 
 

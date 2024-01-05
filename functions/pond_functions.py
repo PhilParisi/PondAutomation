@@ -141,6 +141,12 @@ class Pond:
         self.state20_entry = False # regular flood [filling tank, solenoid open]
         self.state99_entry = False # shutdown/error state [throw system errors to here, program runtime exceeded]
 
+        self.state0_reset_timer = True # if true, then reset timer. if false, don't reset timer (used by restarting after outages)
+        self.state5_reset_timer = True # when leaving a state, these should be set back to True, so the next time we enter the state we reset the timer
+        self.state10_reset_timer = True
+        self.state20_reset_timer = True
+        self.state99_reset_timer = True
+
         # timers
         self.timers = {}       # timers is a dictionary that stores each new timer as another dictionary
                                     # the 'sub-dictionary' stores
@@ -267,6 +273,47 @@ class Pond:
     def set_state99_entry(self, entered):
         self.state0_entry = entered
 
+    def get_state0_reset_timer(self):
+        return self.state0_reset_timer
+
+    def set_state0_reset_timer(self, val):
+        self.state0_reset_timer = val
+
+    def get_state5_reset_timer(self):
+        return self.state5_reset_timer
+
+    def set_state5_reset_timer(self, val):
+        self.state5_reset_timer = val
+
+    def get_state10_reset_timer(self):
+        return self.state10_reset_timer
+
+    def set_state10_reset_timer(self, val):
+        self.state10_reset_timer = val
+
+    def get_state20_reset_timer(self):
+        return self.state20_reset_timer
+
+    def set_state20_reset_timer(self, val):
+        self.state20_reset_timer = val
+
+    def get_state99_reset_timer(self):
+        return self.state99_reset_timer
+
+    def set_state99_reset_timer(self, val):
+        self.state99_reset_timer = val
+
+    def set_state_reset_timer(self, timer_name, val):
+        if timer_name == "initialization":
+            self.set_state0_reset_timer(val)
+        if timer_name == "first drought":
+            self.set_state5_reset_timer(val)
+        if timer_name == "drought":
+            self.set_state10_reset_timer(val)
+        if timer_name == "flood":
+            self.set_state20_reset_timer(val)
+ 
+
 
     def set_state_name(self):
         
@@ -370,6 +417,7 @@ class Pond:
                 #print(the_prev_state_name)
                 self.set_timer_current_time(the_prev_state, datetime.now() - timedelta(seconds=float(outage_dict["mins_in_state"])*60))
                 print(datetime.now() - timedelta(seconds=float(outage_dict["mins_in_state"])*60))
+                self.set_state_reset_timer(the_prev_state, False) # we don't want to reset the timer, because we just set it to the previous value!
 
                 # update total runtime timer
                 self.set_timer_current_time('program_runtime', datetime.now() - timedelta(seconds=float(outage_dict["mins_total_runtime"])*60))
