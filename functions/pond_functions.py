@@ -389,13 +389,11 @@ class Pond:
         # only if there is a outage.csv will we attempt to read it
         if os.path.exists(self.get_power_outage_filename()):
 
-            print('abc')
-
             # pull in old outage csv
             outage_dict = csv_to_dict(self.get_power_outage_filename())
 
             # check if autorestart is set (1 means yes autostart, 0 means don't autostart and go normally)
-            if int(outage_dict["autostart"]) == 1:
+            if int(outage_dict["autostart"]) == 1 and outage_dict["state"] != "None":
 
                 # when autorestarting, we want to update the next_state, the current state timer, and the total runtime
                 print("\n***CONTINUING FROM POWER OUTAGE/CYCLE***\n")
