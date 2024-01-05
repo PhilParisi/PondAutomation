@@ -394,12 +394,6 @@ class Pond:
             # pull in old outage csv
             outage_dict = csv_to_dict(self.get_power_outage_filename())
 
-            print(outage_dict["autostart"])
-            print(int(outage_dict["autostart"]))
-
-            print(outage_dict["mins_in_state"])
-            print(float(outage_dict["mins_in_state"]))
-
             # check if autorestart is set (1 means yes autostart, 0 means don't autostart and go normally)
             if int(outage_dict["autostart"]) == 1:
 
@@ -412,16 +406,14 @@ class Pond:
                 # update state timer (we've already been in state, and timer holds time when we got INTO state, so do datetime - mins_in_state)
                     # note: timers are in seconds, csv are in minutes
                 the_prev_state = outage_dict["state_name"] # this gives text 
-                print(the_prev_state)
-                #the_prev_state_name = self.get_state_name(the_prev_state) # this gives the textual name of the state
-                #print(the_prev_state_name)
+
                 self.set_timer_current_time(the_prev_state, datetime.now() - timedelta(seconds=float(outage_dict["mins_in_state"])*60))
-                print(datetime.now() - timedelta(seconds=float(outage_dict["mins_in_state"])*60))
+                #print(datetime.now() - timedelta(seconds=float(outage_dict["mins_in_state"])*60))
                 self.set_state_reset_timer(the_prev_state, False) # we don't want to reset the timer, because we just set it to the previous value!
 
                 # update total runtime timer
                 self.set_timer_current_time('program_runtime', datetime.now() - timedelta(seconds=float(outage_dict["mins_total_runtime"])*60))
-                print(datetime.now() - timedelta(seconds=float(outage_dict["mins_total_runtime"])*60))
+                #print(datetime.now() - timedelta(seconds=float(outage_dict["mins_total_runtime"])*60))
 
         # then prep_for_power_outage (delete old csv, make new one), regardles of autorestart
         self.prep_for_power_outage()

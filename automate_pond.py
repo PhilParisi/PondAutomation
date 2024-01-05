@@ -84,16 +84,15 @@ def main():
     GPIO.setup(rpi_connections["blue_LED"],GPIO.OUT)
     GPIO.setup(rpi_connections["green_LED"],GPIO.OUT)
 
-
-    # Main Control Loop
-    print("\n*** STARTING POND AUTOMATION LOOP ***\n")
-
     # prep for power outage!
     print('- prep for outage')
     pond.update_pond_with_outage_settings() # won't affect next_state unless autorestart is set in outage.csv
-    #pond.set_next_state(0) start off in initialization mode, and pond.set_command(0) are default in Pond class
+    #pond.set_next_state(0) start off in initialization mode, and pond.set_command(0) is default in Pond class
 
+    # Main Control Loop
+    print("\n*** STARTING POND AUTOMATION LOOP ***\n")
     print("- running loop, use CTRL+C to stop execution anytime")
+
     while (pond.get_error_status() == False):
 
         # check if it's time to end the program
