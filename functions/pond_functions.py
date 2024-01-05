@@ -286,6 +286,7 @@ class Pond:
     # TIMER FUNCTIONS
 
     # self.timers is a dictionary, that holds {'duration': xx, 'current_time': xx} dicts
+        # 'duratin' is how long the timer is set for (ex: a timer that prints every minute has a duration of 1min)
 
     # add_timer() allows a new timer to be created within the pond class
         # it takes in a name and duration in MINUTES
@@ -297,7 +298,7 @@ class Pond:
             print(f"- timer '{timer_name}' already exists, skipping timer creation in add_timer()")
         else:
             time_to_store = datetime.now()
-            self.timers[timer_name] = {'duration': (duration*60), 'current_time': time_to_store} # store the inputted duration and the current_time
+            self.timers[timer_name] = {'duration': (duration*60), 'current_time': time_to_store} # store the inputted duration (secs) and the current_time
             #print(f"- timer '{timer_name}' added")
 
     # reset_timer() allows the user to reset the timer to the current time. This should be done when switching into a new state that needs to be timed
@@ -367,10 +368,12 @@ class Pond:
                 print(the_prev_state)
                 #the_prev_state_name = self.get_state_name(the_prev_state) # this gives the textual name of the state
                 #print(the_prev_state_name)
-                self.set_timer_current_time(the_prev_state, datetime.now() - timedelta(float(outage_dict["mins_in_state"])*60))
+                self.set_timer_current_time(the_prev_state, datetime.now() - timedelta(seconds=float(outage_dict["mins_in_state"])*60))
+                print(datetime.now() - timedelta(seconds=float(outage_dict["mins_in_state"])*60))
 
                 # update total runtime timer
-                self.set_timer_current_time('program_runtime', datetime.now() - timedelta(float(outage_dict["mins_total_runtime"])*60))
+                self.set_timer_current_time('program_runtime', datetime.now() - timedelta(seconds=float(outage_dict["mins_total_runtime"])*60))
+                print(datetime.now() - timedelta(seconds=float(outage_dict["mins_total_runtime"])*60))
 
         # then prep_for_power_outage (delete old csv, make new one), regardles of autorestart
         self.prep_for_power_outage()
