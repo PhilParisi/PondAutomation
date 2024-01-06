@@ -1,7 +1,7 @@
 # PondAutomation
 A collaboration for the development of an automated algae pond. This github repository serves as both the knowledge base of the system as well as the code backend. 
 
-Each github 'branch' represents a different phase of the project. You can select which 'Phase' of the project you would like to view the code for in the dropdown above. 
+Each github 'branch' represents a different version of the project. Use the dropdown above to see/use different branches of the code.
 
 ## Quick Start
 0. setup RPi
@@ -19,9 +19,9 @@ Each github 'branch' represents a different phase of the project. You can select
 | `functions/` contains the scripts that run on the raspberry pi for operation (not to be run by user)
 | `graphics/` contains diagrams and photos, some of which are used in this guide  
 | `automate_pond.py` is the single script that needs to be run by the user, it controls the entire pond
-| `material_list.xlsx` lists the items needed to build the system
-| `reboot_pond.py` is used for automatically running the RPi after a power outage (not to be run by user), it calls the automate_pond.py function
-| `run_on_reboot.sh` is called by the RPi's crontab @reboot, which then calls the reboot_pond.py function (this must be set as an excecutable `chmod +x run_on_reboot.sh`)
+| `material_list.xlsx` lists the items needed to build the system  
+| `reboot_pond.py` is used for automatically running the RPi after a power outage (not to be run by user), it calls the automate_pond.py function  
+| `run_on_reboot.sh` is called by the RPi's crontab @reboot, which then calls the reboot_pond.py function (this must be set as an excecutable `chmod +x run_on_reboot.sh`)  
 
 ### System Requirements
 The following describes the platform the code runs on, other configurations have not been tested
@@ -76,7 +76,7 @@ The below schematic shows the wiring of electrical components and application.
 There are three lights in the box that are used to communicate to people what's happening:
 - Green --> 'drought' state. No water flows as solenoid is shut. Everything is ok.
 - Blue --> 'flood' state. Water is flowing as solenoid is open. Everything is ok.
-- Red --> 'error' state. You shouldn't be in this state. Something is wrong and it's probably not evident. Try SSH'ing into the RPi, use tmux to get into the terminal, look at and note the recent messages, kill it (ctrl+c) and restart with `python3 automate_pond.py`. If that doesn't work, contact the programmer. 
+- Red --> 'error' state. You shouldn't be in this state. Something is wrong and it's probably not evident. Try SSH'ing into the RPi, use tmux to get into the terminal, look at and note the recent messages, kill it (ctrl+c) and restart the pond. If that doesn't work, contact the programmer. 
 
 ### Failure
 The solenoid is **normally closed**, which means:
@@ -91,7 +91,7 @@ Before running the script, the user must create (or edit an existing) configurat
 4. `total_program_runtime` How many MINUTES do you want to run the program for? --> for the number that is inputted, the program ends when this duration is reached // if 0 is inputted, there will be no programmed end to the program (note: if a power outage hits, the program will pick up where it left off and continue running until the duration is reached)
 5. `pond_autorestart_after_outage` Would you like to automatically start the pond after outages? --> if 1, the script automatically restarts when power cycled // if 0, the script will die when powered down and must be manually restarted  
 
-Note: the configuration files must be in the form provided in `quick.py`. 
+Note: the configuration files must be in the form provided in `quick.py` and be inside the `configs/` folder. 
 
 ### Outputs
 - the solenoid is programmed to open and close at intervals set in the 'Inputs' section

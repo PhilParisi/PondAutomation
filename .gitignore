@@ -4,6 +4,6 @@ data/
 
 __pycache__/
 
-.vscode
+.vscode/
 
 .DS_Store
