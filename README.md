@@ -96,7 +96,7 @@ Note: the configuration files must be in the form provided in `quick.py` and be 
 ### Outputs
 - the solenoid is programmed to open and close at intervals set in the 'Inputs' section
 - data is written to .csv files in the `/data` folder (not yet fully implemented)
-- an `cofigs/outage.csv` is created that is used for restarting the script after outages
+- a `configs/outage.csv` is created that is used for restarting the script after outages
 
 
 ## State Transition Diagram
@@ -165,16 +165,37 @@ Assuming you have the code on the pi and everything is physically setup accordin
 - Close the terminal and move on with your life
 
 #### Shutdown the Pond
-- From the terminal, find the name of the tmux session that's running with `tmux list-sessions`. This is your 'session_name' (it's likely 0, 1, or 2)
-- `tmux attach-session -t session_number` to get into that session. This should take you to viewing the outputs from the automate_pond.py script, you should see timestamps, heartbeats, and other status messages.
+- From the terminal, find the name of the tmux session that's running with `tmux list-sessions`. The first word before the colon is your 'session_name' (it's likely pond_reboot, 0, 1, or 2)
+- `tmux attach-session -t session_name` to get into that session. This should take you to viewing the outputs from the automate_pond.py script, you should see timestamps, heartbeats, and other status messages.
 - To kill the script (and shutdown the pond), CTRL+C
 - Then you can close the terminal if you have nothing else to do!
 
 #### Checking in on Operational Pond
-- From the terminal, find the name of the tmux session that's running with `tmux list-sessions`. This is your 'session_name' (it's likely 0, 1, or 2)
-- `tmux attach-session -t session_number` to get into that session. This should take you to viewing the outputs from the automate_pond.py script, you should see timestamps, heartbeats, and other status messages.
+- From the terminal, find the name of the tmux session that's running with `tmux list-sessions`. The first word before the colon is your 'session_name' (it's likely pond_reboot, 0, 1, or 2)
+- `tmux attach-session -t session_name` to get into that session. This should take you to viewing the outputs from the automate_pond.py script, you should see timestamps, heartbeats, and other status messages.
 - Observe the messages and understand what's going on.
 - To leave the pond running and exit the tmux session, CTRL+b (together), then d (after), and you will detach from the tmux session. Pond will continue running.
+
+#### Other (non-autopond) Scripts
+As requested by users, there are a few extra features that have been developed outside of the autopond functionality.  
+
+A few notes:
+- these can be run inside or outside of a tmux window, it doesn't matter.   
+- what does matter, is that you kill the autopond script before running the below (see section 'Shutdown the Pond').  
+- these scripts runs once and finish, unlike the autopond script that continually runs.   
+
+1. close the solenoid only (stop flow)  
+- `python3 close_solenoid.py`  
+- note that in emergencies, you can close the solenoid by unplugging the entire system  
+- this script turns off the solneoid (closing it, preventing flow) and turns on the green light (indicate a drought)  
+- the system will stay like this indefinitely  
+- from here you can run any other scripts, such as open_solenoid.py or automate_pond.py  
+  
+2. open the solenoid only (allow flow)  
+- `python3 open_solenoid.py`  
+- this script turns on the soelnoid (opening it, allowing flow) and turns on the blue light (indicate a flood)  
+- the system will stay like this indefinitely  
+- from here you should run close_solenoid.py to stop thef low, then you can run automate_pond.py to start the autopond  
 
 ## Useful Commands for the RPi
 
