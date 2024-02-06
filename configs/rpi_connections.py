@@ -4,6 +4,7 @@ rpi_connections = {
     # your physical wiring should match these parameters below
     # we use BCM (which is the GPIOXX), not direct pin number
 
+    # RASPBERRY PI CONNECTIONS
     # red LED pin [BCM 16 // GPIO16 // pin #36]
     'red_LED':16,
 
@@ -17,6 +18,18 @@ rpi_connections = {
     'device_bus':1,
     
     # relay number - this is the number of the relay to actuate (0x10, 0x20, 0x30, or 0x40)
-    'relay_addr':0x10 
+    'relay_addr':0x10,
+
+
+    # RPI-to-ARDUINO CONNECTION
+    # note: the .ino script must be flashed to the arduino separately
+        # there are also some parameters in the .ino script that must be followed
+        # the below parameters relate to the USB connection between the RPi and the Arduino
+
+    # serial port where the RPi sees the Arduino via USB
+    'port':'/dev/ttyUSB0',
+
+    # baud rate for the serial connection
+    'baudrate':9600
 
 }

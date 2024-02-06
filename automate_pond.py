@@ -7,6 +7,7 @@ import sys
 import os
 import csv
 import time
+import serial
 import argparse
 import importlib.util
 import smbus
@@ -15,7 +16,7 @@ from datetime import datetime
 from configs.pond_settings import pond_settings_from_file # define the flood/drought params [unused currently]
 from configs.rpi_connections import rpi_connections  # define the pins on RPi to use
 from functions.pond_functions import *
-
+from arduino.rpi_read_serial import read_ino_serial # read the arduino serial data
 
 # define the main function (call it at end of this file)
 def main():
@@ -74,7 +75,10 @@ def main():
     pond.add_timer('first_drought', pond.get_setting('minutes_till_first_flood'))
     pond.add_timer('initialization', 0.05)
     pond.add_timer('program_runtime', pond.get_setting('total_program_runtime'))
-    pond.add_timer('heartbeat', 0.5) # frequent outputs and logging
+    pond.add_timer('heartbeat', 30/60) # frequent outputs and logging every 30 seconds
+    pond.add_timer('write_csv', 10/60) # write to CSV every 10 seconds
+    pond.add_timer('close_and_open_new_csv', 6*60) # stop writing to a given csv, start writing to a new one every 6 hours
+
 
     # Setup GPIO Pins (RPi pins)
     GPIO.setmode(GPIO.BCM) # set to use the GPIOXX (not the physical pin#)
@@ -308,8 +312,35 @@ def main():
             pond.set_state_just_switched(False)
 
 
+        # READ SENSORS (from Arduino) and WRITE TO CSV
+        if (datetime.now() - pond.get_timer_current_time('write_csv')).total_seconds() > pond.get_timer_duration('write_csv'):
+                
+                # read the arduino serial data
+                arduino_data = read_ino_serial(rpi_connections)
 
-        # TODO: write sensor data to csv, based on timer with sampling-freq user input??
+                # create comma-separated message with all data to write
+                    # timestamp, state, licor_par_reading
+                #pond.set_arduino_data(arduino_data)
+                
+                # write to CSV
+                pond.write_line_to_csv()
+                
+                # reset timer
+                pond.reset_timer('write_csv')
+
+
+        # occassionally close and reopen the serial port, save the csv file              
+        if (datetime.now() - pond.get_timer_current_time('close_and_open_new_csv')).total_seconds() > pond.get_timer_duration('close_and_open_new_csv'):
+
+            # ser.close()
+
+            # generate new file name
+
+            # ser.open()
+
+            # reset timer
+            pond.reset_timer('close_and_open_new_csv')
+
 
 
 
