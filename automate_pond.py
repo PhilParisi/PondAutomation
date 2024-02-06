@@ -16,7 +16,7 @@ from datetime import datetime
 from configs.pond_settings import pond_settings_from_file # define the flood/drought params [unused currently]
 from configs.rpi_connections import rpi_connections  # define the pins on RPi to use
 from functions.pond_functions import *
-from arduino.rpi_read_serial import read_ino_serial # read the arduino serial data
+from arduino.rpi_serial_functions import * # read the arduino serial data
 
 # define the main function (call it at end of this file)
 def main():
