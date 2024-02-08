@@ -1,6 +1,7 @@
+// THIS SCRIPT IS FOR TROUBLESHOOTING ONLY. FLASH THE OTHER SCRIPT FOR PRODUCTION LEVEL USE.
+
 // Arduino Script to Read Analog Voltages from LiCOR PAR Sensor
 // Arduino Mega --> 5V operating voltage, 10 bit resolution (0 to 1023 for A/D converter)
-
 // Follow this guide https://www.licor.com/env/support/Light-Sensors/topics/2420-quick-start.html
 
 // arduino mega has 5V logic
