@@ -25,7 +25,7 @@
 
 // define calibration constant (can tweak this if needed)
     // for in-air sensor: C = 6.5 to 6.6 to minimize error
-#define C 6.5 // uA per 1000umol m^-2 s^-1
+#define C 6.6 // uA per 1000umol m^-2 s^-1
 
 // define the built-in LED pinß
 #define led_pin 13
@@ -71,10 +71,9 @@ void loop() {
   Serial.print("licor light intensity: ");
   Serial.println(licor_light_intensity);
 
+  Serial.println("*******************");
 
-  // toggle the LED on and off (this is a temp feature to confirm code is on the mega)
-  digitalWrite(led_pin, HIGH);
-  delay(500); // 500ms delay
-  digitalWrite(led_pin, LOW);
-  delay(500); // 500ms delay
+
+  delay(500);
+
 }
