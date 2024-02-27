@@ -65,19 +65,15 @@ def main():
     print("- the pond settings and data are writing to folder:", pond.get_name_for_output_folder())
 
 
-    # Setup Core Timers
-        # TODO one timer controls the rate we write each line to a CSV
-        # TODO one timer controls the rate we finish a given CSV and start a new one
-        # times should be in minutes
-    
+    # Setup Core Timers    
     pond.add_timer('drought', pond.get_setting('drought_duration'))
     pond.add_timer('flood', pond.get_setting('flood_duration'))
     pond.add_timer('first_drought', pond.get_setting('minutes_till_first_flood'))
     pond.add_timer('initialization', 0.05)
     pond.add_timer('program_runtime', pond.get_setting('total_program_runtime'))
     pond.add_timer('heartbeat', 30/60) # frequent outputs and logging every 30 seconds
-    pond.add_timer('write_csv', 10/60) # write to CSV every 10 seconds
-    pond.add_timer('close_and_open_new_csv', 6*60) # stop writing to a given csv, start writing to a new one every 6 hours
+    pond.add_timer('write_data_csv', 20/60) # write to CSV every 20 seconds
+    pond.add_timer('close_and_open_new_csv', 4*60) # stop writing to a given csv, start writing to a new one every 4 hours
 
 
     # Setup GPIO Pins (RPi pins)
@@ -250,12 +246,9 @@ def main():
             # leave state
 
             # timer based
+            # TODO Song Gao you can add in checking values of sensing data to move between states. Start with the state-transition diagram.
             if (datetime.now() - pond.get_timer_current_time('flood')).total_seconds() > pond.get_timer_duration('flood'):
-                
-                # shut solenoid
-                #bus.write_byte_data(rpi_connections['relay_addr'], rpi_connections['device_bus'], 0x00)
-                #print_w_time("- solenoid closed")
-                
+                             
                 GPIO.output(rpi_connections["blue_LED"],GPIO.LOW) # turn off blue light
                 pond.set_state20_entry(False)
                 pond.set_state20_reset_timer(True)
@@ -283,7 +276,7 @@ def main():
                 sys.exit() # kill program
 
 
-        # SYSTEM CHECKS AND UPDATES
+        ######## SYSTEM CHECKS AND UPDATES ########
         
         # update heartbeat timing
         if (datetime.now() - pond.get_timer_current_time('heartbeat')).total_seconds() > pond.get_timer_duration('heartbeat'):
@@ -293,6 +286,7 @@ def main():
         # HEARTBEAT (triggered by time, if the next_state != current_state, after the first loop, other events)
                 
         if pond.get_trigger_heartbeat() == True:
+
             # print heart beat
             print_w_time("- heartbeat (script is still running)")
             pond.reset_timer('heartbeat')
@@ -311,32 +305,32 @@ def main():
         else:
             pond.set_state_just_switched(False)
 
+                                                   
 
-        # READ SENSORS (from Arduino) and WRITE TO CSV
-        if (datetime.now() - pond.get_timer_current_time('write_csv')).total_seconds() > pond.get_timer_duration('write_csv'):
+
+        #### READ SENSORS (from Arduino) and WRITE TO CSV
+        if (datetime.now() - pond.get_timer_current_time('write_data_csv')).total_seconds() > pond.get_timer_duration('write_data_csv'):
                 
                 # read the arduino serial data
                 arduino_data = read_ino_serial(rpi_connections)
 
-                # create comma-separated message with all data to write
-                    # timestamp, state, licor_par_reading
-                #pond.set_arduino_data(arduino_data)
-                
-                # write to CSV
-                pond.write_line_to_csv()
-                
+                if arduino_data == None:
+                    print_w_time("No data received from Arduino")
+                else:
+                    # update csv with arduino data                
+                    amend_dict_to_data_csv(arduino_data, pond.name_for_output_data_file)
+                    print_w_time("Arduino data received! Logged to csv.")
+
                 # reset timer
-                pond.reset_timer('write_csv')
+                pond.reset_timer('write_data_csv')
 
 
-        # occassionally close and reopen the serial port, save the csv file              
+        # change the name (write a new) csv file every X hours            
         if (datetime.now() - pond.get_timer_current_time('close_and_open_new_csv')).total_seconds() > pond.get_timer_duration('close_and_open_new_csv'):
 
-            # ser.close()
-
-            # generate new file name
-
-            # ser.open()
+            # update pond sensor data filename, so the next time we go write arduino data it starts a new file
+            pond.name_for_output_settings_csv = os.path.join(pond.name_for_output_folder,
+                                                        datetime.now().strftime("%d-%b-%Y %H:%M:%S").replace(" ", "_") + "pond_settings_used.csv")
 
             # reset timer
             pond.reset_timer('close_and_open_new_csv')

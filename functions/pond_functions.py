@@ -96,7 +96,7 @@ def correct_pond_settings(pond_settings):
 
     return pond_settings
 
-
+# writes a dictionary to csv, each key:value pair in a new row
 def write_dict_to_csv(dictionary, file_path):
 
     with open(file_path, mode='w', newline='') as csv_file:
@@ -105,6 +105,35 @@ def write_dict_to_csv(dictionary, file_path):
         # write each key-value pair to a new row
         for key, value in dictionary.items():
             writer.writerow([key, value])
+
+
+# appends a dictionary to csv (defined by the arduino), each value side-by-side in a new column
+    # if the csv doesn't exist, the csv is created and column headers (from the dictionary keys) are written to the first row
+def amend_dict_to_data_csv(dictionary, file_path):
+    
+    try:
+
+        # check if the file exists (if not, create the file)
+        file_exists = os.path.exists(file_path)
+
+        # start a csv writer object
+        with open(file_path, mode='a', newline='') as csv_file:
+            writer = csv.writer(csv_file)
+
+            if not file_exists:
+                # write the keys to the first row as column headers
+                writer.writerow(['Timestamp'] + list(dictionary.keys()))
+
+            # write values to the same row in separate columns (NOT SURE IF THIS WILL WORK AS EXPECTED)
+                # include timestamp!
+            tstamp = datetime.now().strftime("%d-%b-%Y %H:%M:%S")
+            writer.writerow([tstamp] + list(dictionary.values()))
+
+    except FileNotFoundError:
+        print(f"File '{file_path}' not found.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
 
 
 class Pond:
@@ -118,14 +147,15 @@ class Pond:
         # has_error used to kill script (has_error = TRUE means kill script, has_error = False means no errors keep running)
         self.has_error = False
 
-        # pull in datetime to use for output data location
+        # pull in datetime to use for output data location (timestamped)
         self.name_for_output_folder = os.path.join('data',datetime.now().strftime("%d-%b-%Y %H:%M:%S").replace(" ", "_"))
 
-        # name for output settings file
-        self.name_for_output_settings_csv = os.path.join(self.name_for_output_folder,"pond_settings_used.csv")
+        # name for output settings file (timestamped as well)
+        self.name_for_output_settings_csv = os.path.join(self.name_for_output_folder, "pond_settings_used.csv")
 
         # name for output data files
-        self.name_for_output_data_file = os.path.join(self.name_for_output_folder,"pond_data.csv")
+        self.name_for_output_data_file = os.path.join(self.name_for_output_folder,
+                                                        datetime.now().strftime("%d-%b-%Y %H:%M:%S").replace(" ", "_") + "pond_data.csv")
 
         # CONTROL STATE VARIABLES
         # all states start off as False, and switch to True when getting into that state

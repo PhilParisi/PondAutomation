@@ -1,9 +1,12 @@
-// THIS SCRIPT IS FOR TROUBLESHOOTING ONLY. FLASH THE OTHER SCRIPT FOR PRODUCTION LEVEL USE.
-    // for testing, flash this and open the serial monitor. confirm the values you see with a light meter.
+// THIS SCRIPT IS PRODUCTION LEVEL USE. FOR TROUBLESHOOTING INDIVIDUAL SENSORS, USE OTHER .INO SCRIPTS
 
-// Arduino Script to Read Analog Voltages from LiCOR PAR Sensor
+// Arduino Script to Read Analog Voltages from LiCOR PAR Sensor (and other sensors) and send data to RPi over USB.
 // Arduino Mega --> 5V operating voltage, 10 bit resolution (0 to 1023 for A/D converter)
-// Follow this guide https://www.licor.com/env/support/Light-Sensors/topics/2420-quick-start.html
+
+// MESSAGE to RPi STRUCTURE:
+  // string data type
+  // licor_light_intensity, other_sensor_value, other_sensor_value, ...
+
 
 // note on data types: keep everything as floats to avoid accidental integer division (rounding errors)
 
@@ -65,6 +68,7 @@ void setup() {
   int blink_led_val = 0;
   blink_led_timer = millis();
 
+  // set initial timer
   send_data_to_rpi_timer = millis();
 
 }
@@ -73,6 +77,7 @@ void setup() {
 void loop() {
 
 
+  // only read sensors (and send to RPi) at the specified interval
   if (millis() - send_data_to_rpi_timer >= send_data_to_rpi_interval) {
     
     // read all the pins, calculate sensor values
@@ -97,7 +102,7 @@ void loop() {
     // convert voltage into light intensity with M
     float licor_light_intensity = licor_voltage * M;
 
-    // add to msg_over_serial
+    // add to Licor Data to msg_over_serial
     msg_over_serial = msg_over_serial + String(licor_light_intensity);
 
 
@@ -106,7 +111,11 @@ void loop() {
     // msg_over_serial = msg_over_serial + "," + String(other_sensor_value);
 
 
-    // send values to RPi over serial (also viewable via serial monitor)
+    // SEND TO RPi
+    // clear the serial buffer before sending new data
+    Serial.flush();
+
+    // send fresh values to RPi over serial (also viewable via serial monitor)
     Serial.println(msg_over_serial);
 
     // reset timer

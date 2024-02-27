@@ -23,13 +23,13 @@ rpi_connections = {
 
     # RPI-to-ARDUINO CONNECTION
     # note: the .ino script must be flashed to the arduino separately
-        # there are also some parameters in the .ino script that must be followed
+        # there are also some parameters in the .ino script that must be set
         # the below parameters relate to the USB connection between the RPi and the Arduino
 
     # serial port where the RPi sees the Arduino via USB
-    'port':'/dev/ttyUSB0',
+    'ino_usb_port':'/dev/ttyUSB0',
 
     # baud rate for the serial connection
-    'baudrate':9600
+    'ino_usb_baudrate':9600
 
 }
