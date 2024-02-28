@@ -1,27 +1,33 @@
-# PondAutomation
+# PondAutomation (v2-dev)
 A collaboration for the development of an automated algae pond. This github repository serves as both the knowledge base of the system as well as the code backend. 
 
 Each github 'branch' represents a different version of the project. Use the dropdown above to see/use different branches of the code.
 
 ## Quick Start
-0. setup RPi
-1. `git clone https://github.com/PhilParisi/PondAutomation`
-2. `tmux`
-3. `python3 automate_pond.py --configs configs/your_config.py`
+0. setup RPi, wire sensors, connect arduino
+1. flash `arduino/read_sensors.ino` to arduino
+2. `git clone https://github.com/PhilParisi/PondAutomation`
+3. `tmux`
+4. `python3 automate_pond.py --configs configs/your_config.py`
 
 ### File Structure
 `PondAutomation/`
-|`configs/` contains configurations needed to run the system  
+| `arduino` contains .ino scripts for communicating with analog sensors
+| `configs/` contains configurations needed to run the system  
 | `data/` upon running the script, outputs are stored here  
 | |---- `DATETIME/`  
 | | |---- `pond_settings_used.csv` contains the configurations used  
-| | |---- `DATETIME_sensor_data` contains sensor measurements (future work)  
+| | |---- `DATETIME_pond_data.csv` contains timestamped sensor measurements
 | `functions/` contains the scripts that run on the raspberry pi for operation (not to be run by user)
 | `graphics/` contains diagrams and photos, some of which are used in this guide  
-| `automate_pond.py` is the single script that needs to be run by the user, it controls the entire pond
+| `automate_pond.py` is the single script that needs to be run by the user, it controls the entire pond (you should run this!)
 | `material_list.xlsx` lists the items needed to build the system  
-| `reboot_pond.py` is used for automatically running the RPi after a power outage (not to be run by user), it calls the automate_pond.py function  
-| `run_on_reboot.sh` is called by the RPi's crontab @reboot, which then calls the reboot_pond.py function (this must be set as an excecutable `chmod +x run_on_reboot.sh`)  
+| `open_solenoid.py` for testing or long-term actuation, this purely opens the solenoid (do not use alongside `automate_pond.py`) (you can run this!)
+| `close_solenoid.py` for testing or long-term actuation, this purely closes the solenoid (do not use alongside `automate_pond.py`) (you can run this!)
+| `reboot_pond.py` is used for automatically running the RPi after a power outage, it calls the automate_pond.py function (not to be run by user)
+| `run_on_reboot.sh` is called by the RPi's crontab @reboot, which then calls the reboot_pond.py function (this must be set as an excecutable `chmod +x run_on_reboot.sh`) (not to be run by user)
+| `test_lights.py` is a script to ensure the lights are programmed/wired correctly (you should run this!)
+| `test_solenoid.py` is a script that actuates the solenoid to ensure it is programmed/wired correctly (you should run this!)
 
 ### System Requirements
 The following describes the platform the code runs on, other configurations have not been tested
@@ -56,19 +62,26 @@ Goal: build on V0 by making the system automatically restart after power outages
 
 This allows the autopond program to continue where things left off before a power outage. The launch procedure no longer takes user inputs, but reads from a config file using `python3 automate_pond.py --config configs/your_config_here.py`. Users can create configurations in the `/configs` folder. 
 
+## V2 - Analog Sensors w/ Arduino
+Goal: integrate LiCOR PAR sensor to measure light intensity, log data to csv, and prepare system for further sensors.
+
+This enables the autopond to extend its sensing capabilities. An additional Arduino microcontroller is needed, that connects to the RPi via a USB cable. The Arduino reads the analog sensor and passes the data back to the RPi, which appends a csv with the data. Launching is the same as V1.
+
+
 ## Usage
 Full usage of the code can be found later in this guide. 
 
 
 ## Schematic
-The below schematic shows the wiring of electrical components and application.
+The below schematic shows the wiring of electrical components and application. The Arduino wiring is show in the `Arduino` section of this readme.
 ![Pond Schematic](graphics/pond_schematic.png)
 
 #### Key Hardware
 1. RaspberryPi 4B (2GB RAM) for control
-2. Relay to power solenoid
-3. Solenoid (6-12V) to open/shutoff flow
-4. Breadboard w/ Diode and LED state indicator lights (see 'State Transition Diagram' below)
+2. Arduino Mega for analog sensors
+3. Relay to power solenoid
+4. Solenoid (6-12V) to open/shutoff flow
+5. Breadboard w/ Diode and LED state indicator lights (see 'State Transition Diagram' below)
 
 ## Operation and Failure Modes
 
@@ -195,3 +208,20 @@ tmux is a terminal management system. It allows us to 'detach' from a terminal. 
 - `tmux attach-session -t session_name` will attach your terminal to the existing tmux session. Do this when the pond is running and you want to attach to it
 - `tmux kill-session -t session_name` will destroy a tmux session. Do this when you accidentally made a tmux session and need to get rid of it. You can always start a new one!
 - `tmux new-session -d -s session_name 'python3 automate_pond.py --configs configs/your_config.py'` starts a tmux session with a name, run the python file within that session, and immediately detaches from it
+
+## Arduino Setup
+
+An Arduino Mega is recommended to host a variety of sensors with a single unit. The Arduino is needed to accept analog voltages from sensors (the RPi can only accept digital inputs). Thus, we use the Arduino as an Analog to Digital converter by passing the recorded sensor values to the RPi via USB.  
+
+### .ino Files
+All the .ino files are stored in the `arduino` folder.
+- `licor_par_test.ino` is used to test the LiCOR PAR sensor and output values to the serial monitor in the arduino IDE
+- `read_sensors.ino` is the for operations (once all the sensors are functional, flash this to arduino)  
+
+### LiCOR PAR
+The LiCOR PAR sensor requires an amplifier to amplify the signals coming from the sensor. This is connected in between the LiCOR PAR and the arduino. Their [amplifier documentation](https://www.licor.com/env/support/LI-210R/topics/210r-2420-amplifier.html?Highlight=2420) is sufficient. Use the differential wiring (over single-ended wiring) when possible. 
+
+### Arduino-Sensor Wiring
+The wiring depicted here should be refelected by the scripts in the `arduino` folder. Users should confirm the correct pins are called out in the scripts match the physical setup, especially if there errors are encountered.
+
+![arduino wiring diagram](graphics/arduino_wiring.png)
