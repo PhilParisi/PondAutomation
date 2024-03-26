@@ -114,7 +114,7 @@ Note: the configuration files must be in the form provided in `quick.py` and be 
 
 ## State Transition Diagram
 Below is the state transition diagram which describes the behavior of the system, and how the program transitions to different states. This is also called the 'control flow'.  
-![state transition diagram](graphics/pond_statetransition.png)
+![state transition diagram](graphics/V2_StateTransition.png)
 
 
 ## Working with your RaspberryPi
