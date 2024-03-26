@@ -259,22 +259,22 @@ class Pond:
         self.state5_entry = entered
 
     def get_state10_entry(self):
-        return self.state0_entry
+        return self.state10_entry
     
     def set_state10_entry(self, entered):
-        self.state0_entry = entered
+        self.state10_entry = entered
 
     def get_state20_entry(self):
-        return self.state0_entry
+        return self.state20_entry
     
     def set_state20_entry(self, entered):
-        self.state0_entry = entered
+        self.state20_entry = entered
 
     def get_state99_entry(self):
-        return self.state0_entry
+        return self.state99_entry
     
     def set_state99_entry(self, entered):
-        self.state0_entry = entered
+        self.state99_entry = entered
 
     def get_state0_reset_timer(self):
         return self.state0_reset_timer
