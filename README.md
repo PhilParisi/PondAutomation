@@ -5,9 +5,10 @@ Each github 'branch' represents a different version of the project. Use the drop
 
 ## Quick Start
 0. setup RPi
+1. update crontab (see below instructions), update reboot_pond.py
 1. `git clone https://github.com/PhilParisi/PondAutomation`
 2. `tmux`
-3. `python3 automate_pond.py --configs configs/your_config.py`
+3. `python3 automate_pond.py --config configs/your_config.py`
 
 ### File Structure
 `PondAutomation/`
@@ -51,10 +52,26 @@ Goal: develop a simple control loop system to open/close solenoid for adding wat
 
 This version of the code (found on the `v0-field` branch) can be run using `python3 automate_pond.py` and responding to prompts in the terminal.
 
-## V1 - Power Outages
-Goal: build on V0 by making the system automatically restart after power outages.   
+## V1 - Power Outages & Updates
+Goal: V1 builds on V0 by making the system automatically restart after power outages.   
 
-This allows the autopond program to continue where things left off before a power outage. The launch procedure no longer takes user inputs, but reads from a config file using `python3 automate_pond.py --config configs/your_config_here.py`. Users can create configurations in the `/configs` folder. 
+*Major Change #1: launching*
+The launch command has changed to `python3 automate_pond.py --config configs/your_config_here.py`. You now need to specify a configuration file when launching (example config files are available in the `/config` folder of the repository, such as `quick.py`). You can edit that config, or create a new with a different name. 
+
+*Major Change #2: auto restart*
+This allows the autopond program to continue where things left off before a power outage. The re-launch procedure happens automatically upon powering on of the RPi by reading from a `outage.csv` file that is updates every time there is a 'heartbeat' in the program. To enable the autorestart, be sure to include the relevant parameter `'pond_autorestart_after_outage':1` in your `/config/your_config.py` file. 
+
+To trigger the restart, you need to do the following (one time):
+- clone the v1-field repository
+14. (new for v1) update your crontab:
+- `crontab -e`
+- scroll to the bottom, and add the below line:
+- `@reboot /home/DEVICE_USERNAME/PondAutomation/run_on_reboot.sh` (update based on your device's username, then hit ctrl+o, enter, ctrl+x)
+15. (new for v1) open `reboot_pond.py` and update the filepath as well to `/home/DEVICE_USERNAME/PondAutomation/...` for the path to the CSV file
+
+Now, everytime the RPi is powered up... if the `'pond_autorestart_after_outage':1` in the config and if there was a `/config/outage.csv` file present on boot, the pond with automatically pick up where things left off.
+
+To STOP the pond for automatically restarting, you need to SSH into the RPi, attach to the tmux session where the autopond script is running, and use ctrl+c to kill the script. Then, delete the `/configs/outage.csv` file too. Now upon reboot, the RPi will not do anything. You could also go back into `crontab -e` and comment out the line that runs the .sh script on reboot.
 
 ## Usage
 Full usage of the code can be found later in this guide. 
@@ -96,7 +113,7 @@ Note: the configuration files must be in the form provided in `quick.py` and be 
 ### Outputs
 - the solenoid is programmed to open and close at intervals set in the 'Inputs' section
 - data is written to .csv files in the `/data` folder (not yet fully implemented)
-- an `cofigs/outage.csv` is created that is used for restarting the script after outages
+- a `configs/outage.csv` is created that is used for restarting the script after outages
 
 
 ## State Transition Diagram
@@ -125,7 +142,8 @@ In this section, we cover the basics of setting up a raspberryPi device. For thi
 14. (new for v1) update your crontab:
 - `crontab -e`
 - scroll to the bottom, and add the below line:
-- `@reboot /home/pond/PondAutomation/run_on_reboot.sh` (then hit ctrl+o, enter, ctrl+x)
+- `@reboot /home/DEVICE_USERNAME/PondAutomation/run_on_reboot.sh` (update based on your device's username, then hit ctrl+o, enter, ctrl+x)
+15. (new for v1) open `reboot_pond.py` and update the filepath as well to `/home/DEVICE_USERNAME/PondAutomation/...` for the path to the CSV file
 15. Once your physical system and electronics are wired up, you cant test the lights and the solenoid with:
 - `python3 ~/PondAutomation/test_lights.py` the output of your script should match the lights that are blinking
 - `python3 ~/PondAutomation/test_solenoid.py` the output of your script should match whether the solenoid is open/closed. Note that some solenoids won't fully open (no visual cue) and require flow pressure in order to open (try blowing air through) 
@@ -165,16 +183,37 @@ Assuming you have the code on the pi and everything is physically setup accordin
 - Close the terminal and move on with your life
 
 #### Shutdown the Pond
-- From the terminal, find the name of the tmux session that's running with `tmux list-sessions`. This is your 'session_name' (it's likely 0, 1, or 2)
-- `tmux attach-session -t session_number` to get into that session. This should take you to viewing the outputs from the automate_pond.py script, you should see timestamps, heartbeats, and other status messages.
+- From the terminal, find the name of the tmux session that's running with `tmux list-sessions`. The first word before the colon is your 'session_name' (it's likely pond_reboot, 0, 1, or 2)
+- `tmux attach-session -t session_name` to get into that session. This should take you to viewing the outputs from the automate_pond.py script, you should see timestamps, heartbeats, and other status messages.
 - To kill the script (and shutdown the pond), CTRL+C
 - Then you can close the terminal if you have nothing else to do!
 
 #### Checking in on Operational Pond
-- From the terminal, find the name of the tmux session that's running with `tmux list-sessions`. This is your 'session_name' (it's likely 0, 1, or 2)
-- `tmux attach-session -t session_number` to get into that session. This should take you to viewing the outputs from the automate_pond.py script, you should see timestamps, heartbeats, and other status messages.
+- From the terminal, find the name of the tmux session that's running with `tmux list-sessions`. The first word before the colon is your 'session_name' (it's likely pond_reboot, 0, 1, or 2)
+- `tmux attach-session -t session_name` to get into that session. This should take you to viewing the outputs from the automate_pond.py script, you should see timestamps, heartbeats, and other status messages.
 - Observe the messages and understand what's going on.
 - To leave the pond running and exit the tmux session, CTRL+b (together), then d (after), and you will detach from the tmux session. Pond will continue running.
+
+#### Other (non-autopond) Scripts
+As requested by users, there are a few extra features that have been developed outside of the autopond functionality.  
+
+A few notes:
+- these can be run inside or outside of a tmux window, it doesn't matter.   
+- what does matter, is that you kill the autopond script before running the below (see section 'Shutdown the Pond').  
+- these scripts runs once and finish, unlike the autopond script that continually runs.   
+
+1. close the solenoid only (stop flow)  
+- `python3 close_solenoid.py`  
+- note that in emergencies, you can close the solenoid by unplugging the entire system  
+- this script turns off the solneoid (closing it, preventing flow) and turns on the green light (indicate a drought)  
+- the system will stay like this indefinitely  
+- from here you can run any other scripts, such as open_solenoid.py or automate_pond.py  
+  
+2. open the solenoid only (allow flow)  
+- `python3 open_solenoid.py`  
+- this script turns on the soelnoid (opening it, allowing flow) and turns on the blue light (indicate a flood)  
+- the system will stay like this indefinitely  
+- from here you should run close_solenoid.py to stop thef low, then you can run automate_pond.py to start the autopond  
 
 ## Useful Commands for the RPi
 

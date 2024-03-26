@@ -9,8 +9,10 @@ from functions.pond_functions import *
 
 def main():
     
-    # hardcoded outage filename (must be explicit, not relative filepath)
+    # hardcoded outage filename (THIS MUST BE UPDATED FOR YOUR DEVICE!!! provide the explicit, not relative, filepath)
     filename = "/home/pond/PondAutomation/configs/outage.csv"
+
+    print(f"Using the filepath {filename} for the outage.csv file. If this is incorrect, please update the filename in reboot_pond.py\n")
 
     # only if there is a outage.csv will we attempt to read it
     if os.path.exists(filename):
@@ -57,6 +59,6 @@ if __name__ == "__main__":
         print("\nUser shut down program with CTRL+C.")
     finally: 
 
-        print("reboot_pond.py finished. check to ensure tmux is running with --> tmux list-sessions")
+        print("reboot_pond.py finished. check to see if tmux is running with --> tmux list-sessions")
         
             
